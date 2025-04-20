@@ -198,3 +198,30 @@ export default function Register() {
                 color: 'white',
                 padding: '12px',
                 borderRadius: '6px',
+                border: 'none',
+                fontWeight: '500',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+              type="submit"
+            >
+              Create Account
+            </button>
+          </form>
+
+          <div style={{
+            textAlign: 'center',
+            marginTop: '24px'
+          }}>
+            <span style={{ color: '#4b5563' }}>Already have an account? </span>
+            <a href="/login" style={{
+              color: '#ef4444',
+              fontWeight: '500',
+              textDecoration: 'none'
+            }}>Login</a>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
