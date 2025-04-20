@@ -154,3 +154,51 @@ export default function Login() {
               <input
                 style={{
                   width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  fontSize: '14px'
+                }}
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <button
+              style={{
+                width: '100%',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '12px',
+                borderRadius: '6px',
+                border: 'none',
+                fontWeight: '500',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+              type="submit"
+            >
+              Login
+            </button>
+          </form>
+
+          <div style={{
+            textAlign: 'center',
+            marginTop: '24px'
+          }}>
+            <span style={{ color: '#4b5563' }}>Don't have an account? </span>
+            <a href="/register" style={{
+              color: '#ef4444',
+              fontWeight: '500',
+              textDecoration: 'none'
+            }}>Register</a>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
