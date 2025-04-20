@@ -97,4 +97,104 @@ export default function Register() {
             display: 'flex',
             alignItems: 'center',
             margin: '20px 0'
-          }}></div>
+          }}>
+            <div style={{
+              flexGrow: 1,
+              height: '1px',
+              backgroundColor: '#d1d5db'
+            }}></div>
+            <div style={{
+              margin: '0 16px',
+              fontSize: '14px',
+              color: '#6b7280'
+            }}>Or continue with</div>
+            <div style={{
+              flexGrow: 1,
+              height: '1px',
+              backgroundColor: '#d1d5db'
+            }}></div>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '4px'
+              }}>Full Name</label>
+              <input
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  fontSize: '14px'
+                }}
+                type="text"
+                name="name"
+                placeholder="Enter your full name"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '4px'
+              }}>Email Address</label>
+              <input
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  fontSize: '14px'
+                }}
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '4px'
+              }}>Password</label>
+              <input
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  fontSize: '14px'
+                }}
+                type="password"
+                name="password"
+                placeholder="Create a password"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <button
+              style={{
+                width: '100%',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '12px',
+                borderRadius: '6px',
