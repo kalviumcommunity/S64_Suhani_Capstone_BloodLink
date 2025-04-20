@@ -1,3 +1,16 @@
+
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const http = require('http');
+const connectDB = require('./config/db');
+// const { setupWebSocket } = require('./socket');
+
+// Load environment variables from .env
+dotenv.config();
+
+// Create Express app
+
 // const express = require('express');
 // const dotenv = require('dotenv');
 // const cors = require('cors');
@@ -52,6 +65,7 @@
 //   console.error('❌ Failed to start server:', err.message);
 // });
 const express = require("express")
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.get('/api/test', (req, res) => {
