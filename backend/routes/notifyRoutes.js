@@ -1,7 +1,7 @@
-const express = require('express');
-const { sendReminder } = require('../controller/notifyController');
-const router = express.Router();
+// const express = require('express');
+// // const { sendReminder } = require('../controller/notifyController');
+// const router = express.Router();
 
-router.post('/send', sendReminder);
+// router.post('/send', sendReminder);
 
-module.exports = router;
+// module.exports = router;
