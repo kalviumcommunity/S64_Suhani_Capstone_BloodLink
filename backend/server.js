@@ -42,7 +42,7 @@ const notifyRoutes = require('./routes/notifyRoutes');
 // ✅ Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/slots', slotRoutes);
-// app.use('/api/centers', centerRoutes); // <-- Important one!
+app.use('/api/centers', centerRoutes); // <-- Important one!
 // app.use('/api/notify', notifyRoutes);
 
 // ✅ Log that routes are loaded
