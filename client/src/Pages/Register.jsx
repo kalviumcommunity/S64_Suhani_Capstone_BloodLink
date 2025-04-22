@@ -27,6 +27,7 @@ export default function Register() {
         credential: credentialResponse.credential
       });
       localStorage.setItem('token', res.data.token);
+      // localStorage.setItem('userId', res.data.user._id);
       navigate('/');
     } catch (err) {
       alert(err.response?.data?.error || 'Google login failed');
@@ -84,7 +85,7 @@ export default function Register() {
             marginBottom: '16px'
           }}>
             <GoogleLogin
-            clientId="623636336763-dsusevrkricim5npu9qdefmpbabv4ugp.apps.googleusercontent.com"
+            // clientId="623636336763-dsusevrkricim5npu9qdefmpbabv4ugp.apps.googleusercontent.com"
               onSuccess={handleGoogleSuccess}
               onError={() => alert('Google Registration Failed')}
               shape="pill"

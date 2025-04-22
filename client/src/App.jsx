@@ -1,38 +1,154 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// import Centers from './components/NearbyCenters';
+import Register from './pages/Register';
+import Login from './pages/Login';
+// import Dashboard from './pages/Dashboard';
+// import Profile from './components/Profile';
+// import EditProfile from './components/EditProfile';
+// import Header from './components/Nav';
+import Home from './pages/Home';
+// import HealthTips from './pages/HealthTips';
+// import ProfilePage from './pages/ProfilePage';
+// import BloodDonationForm from './pages/BloodDonationForm';
+import Slot from './components/slot';
+// import Slot from '../../backend/models/Slot';
+// import Confirmation from './components/Confirmation';
+import Landingpage from './pages/Landingpage';
+// import BookingSuccess from './components/BookingSuccess';
+// import NotificationSystem from './components/NotificationSystem';
+// import NotificationToast from './components/NotificationToast';
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkLoggedIn = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('http://localhost:5000/api/users/profile', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            setAuthenticated(true);
+          } else {
+            // Token is invalid or expired
+            localStorage.removeItem('token');
+            setAuthenticated(false);
+          }
+        } catch (error) {
+          console.error('Error checking auth status:', error);
+          localStorage.removeItem('token');
+          setAuthenticated(false);
+        }
+      } else {
+        setAuthenticated(false);
+      }
+      
+      setLoading(false);
+    };
+    
+    checkLoggedIn();
+  }, []);
+
+  const handleLogin = (userData, token) => {
+    localStorage.setItem('token', token);
+    setUser(userData);
+    setAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setAuthenticated(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/users/delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setAuthenticated(false);
+      } else {
+        alert('Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
+  };
+
+  // Protected route component
+  const ProtectedRoute = ({ children }) => {
+    if (loading) return <div>Loading...</div>;
+    
+    if (!authenticated) {
+      return <Navigate to="/login" />;
+    }
+    
+    return children;
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      {/* <Header user={user} onLogout={handleLogout} /> */}
+      
+      <Routes>
+        {/* <Route path="/find-centers" element={<Centers />} />
+        <Route path="/book-slot" element={<Slot/>} /> */}
+        <Route path="/" element={<Landingpage/>} />
+        <Route path="/register" element={<Register />} />
+        {/* <Route path="/confirm-booking" element={< Confirmation/>} />
+        <Route path="/health-tips" element={<HealthTips />} />
+        <Route path="/profilePage" element={<ProfilePage />} />
+        <Route path="/notification" element={<NotificationSystem />} />
+        <Route path="/notification-toast" element={<NotificationToast />} />
+        <Route path="/BloodDonationForm" element={<BloodDonationForm/>} /> */}
+        <Route path="/Home" element={<Home/>} />
+        {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
+        <Route path="/login" element={
+          authenticated ? <Navigate to="/profile" /> : <Login onLogin={handleLogin} />
+        } />
+        
+        {/* <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile user={user} onDeleteAccount={handleDeleteAccount} />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/edit-profile" element={
+          <ProtectedRoute>
+            <EditProfile user={user} setUser={setUser} />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard user={user} />
+          </ProtectedRoute>
+        } /> */}
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
-// import React, { useState, useEffect } from 'react';
-// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import Header from './components/Nav';
+export default App;
