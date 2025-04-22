@@ -1,6 +1,7 @@
 const Slot = require('../models/Slot');
 
 // Book a slot
+
 exports.bookSlot = async (req, res) => {
   const { userId, centerId, time, date, userConfirmedEligibility } = req.body;
 
@@ -31,6 +32,7 @@ exports.bookSlot = async (req, res) => {
       message: 'Slot booked successfully', 
       _id: savedSlot._id,
       slot: savedSlot
+
     });
   } catch (err) {
     console.error('Slot booking error:', err);
@@ -54,6 +56,7 @@ exports.confirmSlot = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Unauthorized to confirm this booking' });
     }
 
+
     slot.confirmed = userConfirmedEligibility;
     await slot.save();
 
@@ -71,7 +74,8 @@ exports.getUserSlots = async (req, res) => {
 
     if (req.user._id.toString() !== userId) {
       return res.status(403).json({ success: false, error: 'Access denied' });
-    }
+    } 
+
 
     const slots = await Slot.find({ userId }).populate('centerId');
     res.json({ success: true, slots });
@@ -82,6 +86,7 @@ exports.getUserSlots = async (req, res) => {
 };
 
 // Get all center slots
+
 exports.getSlotsByCenter = async (req, res) => {
   try {
     const centerId = req.params.centerId;
@@ -93,6 +98,7 @@ exports.getSlotsByCenter = async (req, res) => {
   }
 };
 // Get available slots for a center on a specific date
+
 exports.getAvailableSlots = async (req, res) => {
   try {
     const { centerId, date } = req.params;
