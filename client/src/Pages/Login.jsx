@@ -30,7 +30,8 @@ export default function Login() {
         tokenId: credentialResponse.credential
       });
       localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+      localStorage.setItem('userId', res.data.user._id);
+      navigate('/home');
     } catch (err) {
       alert(err.response?.data?.error || 'Google login failed');
     }
@@ -54,7 +55,7 @@ export default function Login() {
           width: '100%',
           maxWidth: '420px'
         }}>
-            <div style={{
+          <div style={{
             display: 'flex',
             justifyContent: 'center',
             marginBottom: '24px'
