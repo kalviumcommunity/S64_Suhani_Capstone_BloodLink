@@ -1,0 +1,16 @@
+meta {
+  name: Centers
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:5000/api/centers/nearby?lat=28.6139&lng=77.2090
+  body: none
+  auth: inherit
+}
+
+params:query {
+  lat: 28.6139
+  lng: 77.2090
+}
