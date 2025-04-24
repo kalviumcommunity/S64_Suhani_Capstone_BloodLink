@@ -2,7 +2,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import Nav from '../components/Nav'; // adjust path if needed
+// import Nav from '../components/Nav'; // adjust path if needed
+import Navbar from '../components/Navbar';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -36,7 +37,7 @@ export default function Register() {
 
   return (
     <>
-      <Nav /> {/* <- navigation bar added here */}
+      <Navbar /> {/* <- navigation bar added here */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
