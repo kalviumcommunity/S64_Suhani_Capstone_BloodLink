@@ -32,7 +32,7 @@ Database: MongoDB (stores center locations & data)
  ✅ Upcoming Appointment Reminders
  ✅ Emergency Blood Requests Nearby
 Tech Stack:
-Backend: Node.js, WebSockets
+Backend: Node.js, WebSocket.io
 Database: MongoDB (stores notification logs)
 
 5️⃣If ineligible, it suggests:
