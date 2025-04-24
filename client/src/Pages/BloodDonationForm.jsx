@@ -198,6 +198,101 @@ const BloodDonationForm = () => {
   const fileInputStyle = {
     display: 'none'
   };
+  return (
+    <div style={formContainerStyle}>
+      <h1 style={{ color: '#dc3545', textAlign: 'center', marginBottom: '30px' }}>
+        BloodLink Registration
+      </h1>
+      
+      <form onSubmit={handleSubmit}>
+        <div style={photoUploadStyle}>
+          <h2>Profile Photo</h2>
+          
+          {photoPreview ? (
+            <img 
+              src={photoPreview} 
+              alt="Profile preview" 
+              style={photoPreviewStyle} 
+            />
+          ) : (
+            <div style={photoPlaceholderStyle}>
+              No photo selected
+            </div>
+          )}
+          
+          <label style={fileInputLabelStyle}>
+            {photo ? 'Change Photo' : 'Upload Photo'}
+            <input
+              type="file"
+              name="photo"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              style={fileInputStyle}
+            />
+          </label>
+        </div>
+      
+        <div style={formLayoutStyle}>
+          <div style={columnStyle}>
+            <div style={sectionStyle}>
+              <h2>Personal Information</h2>
+              
+              <label style={labelStyle}>Full Name</label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                style={inputStyle}
+                required
+              />
+              
+              <label style={labelStyle}>Date of Birth</label>
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                style={inputStyle}
+                required
+              />
+              
+              <label style={labelStyle}>Gender</label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                style={inputStyle}
+                required
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+              
+              <label style={labelStyle}>Blood Type</label>
+              <select
+                name="bloodType"
+                value={formData.bloodType}
+                onChange={handleChange}
+                style={inputStyle}
+                required
+              >
+                <option value="">Select your blood type</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+          </div>
+          
 
             
   <div style={columnStyle}>
