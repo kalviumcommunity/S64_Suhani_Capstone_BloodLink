@@ -8,15 +8,15 @@ import Login from './pages/Login';
 // import EditProfile from './components/EditProfile';
 // import Header from './components/Nav';
 import Home from './pages/Home';
-// import HealthTips from './pages/HealthTips';
+import HealthTips from './pages/HealthTips';
 // import ProfilePage from './pages/ProfilePage';
-// import BloodDonationForm from './pages/BloodDonationForm';
+import BloodDonationForm from './pages/BloodDonationForm';
 import Slot from './components/slot';
 // import Slot from '../../backend/models/Slot';
 // import Confirmation from './components/Confirmation';
 import Landingpage from './pages/Landingpage';
 // import BookingSuccess from './components/BookingSuccess';
-// import NotificationSystem from './components/NotificationSystem';
+import NotificationSystem from './components/NotificationSystem';
 // import NotificationToast from './components/NotificationToast';
 function App() {
   const [user, setUser] = useState(null);
@@ -117,12 +117,12 @@ function App() {
         <Route path="/book-slot" element={<Slot/>} /> */}
         <Route path="/" element={<Landingpage/>} />
         <Route path="/register" element={<Register />} />
-        {/* <Route path="/confirm-booking" element={< Confirmation/>} />
+        {/* <Route path="/confirm-booking" element={< Confirmation/>} /> */}
         <Route path="/health-tips" element={<HealthTips />} />
-        <Route path="/profilePage" element={<ProfilePage />} />
+        {/* <Route path="/profilePage" element={<ProfilePage />} /> */}
         <Route path="/notification" element={<NotificationSystem />} />
-        <Route path="/notification-toast" element={<NotificationToast />} />
-        <Route path="/BloodDonationForm" element={<BloodDonationForm/>} /> */}
+        {/* <Route path="/notification-toast" element={<NotificationToast />} /> */}
+        <Route path="/BloodDonationForm" element={<BloodDonationForm/>} />
         <Route path="/Home" element={<Home/>} />
         {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
         <Route path="/login" element={

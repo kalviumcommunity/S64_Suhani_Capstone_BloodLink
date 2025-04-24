@@ -198,6 +198,7 @@ const BloodDonationForm = () => {
   const fileInputStyle = {
     display: 'none'
   };
+
   return (
     <div style={formContainerStyle}>
       <h1 style={{ color: '#dc3545', textAlign: 'center', marginBottom: '30px' }}>
@@ -293,92 +294,90 @@ const BloodDonationForm = () => {
             </div>
           </div>
           
-
-            
-  <div style={columnStyle}>
-  <div style={sectionStyle}>
-    <h2>Contact Information</h2>
-    
-    <label style={labelStyle}>Email</label>
-    <input
-      type="email"
-      name="email"
-      value={formData.email}
-      onChange={handleChange}
-      placeholder="Enter your email"
-      style={inputStyle}
-      required
-    />
-    
-    <label style={labelStyle}>Phone Number</label>
-    <input
-      type="tel"
-      name="phoneNumber"
-      value={formData.phoneNumber}
-      onChange={handleChange}
-      placeholder="Enter your phone number"
-      style={inputStyle}
-      required
-    />
-    
-    <label style={labelStyle}>Address</label>
-    <textarea
-      name="address"
-      value={formData.address}
-      onChange={handleChange}
-      placeholder="Enter your address"
-      style={textareaStyle}
-      required
-    />
-    
-    <label style={labelStyle}>Emergency Contact</label>
-    <input
-      type="text"
-      name="emergencyContact"
-      value={formData.emergencyContact}
-      onChange={handleChange}
-      placeholder="Name and phone number"
-      style={inputStyle}
-      required
-    />
-  </div>
-</div>
-</div>
-
-<div style={sectionStyle}>
-<h2>Health Information</h2>
-
-<label style={labelStyle}>Do you have any medical conditions?</label>
-<textarea
-  name="medicalConditions"
-  value={formData.medicalConditions}
-  onChange={handleChange}
-  placeholder="List any medical conditions"
-  style={textareaStyle}
-/>
-
-<label style={labelStyle}>Are you currently taking any medications?</label>
-<textarea
-  name="medications"
-  value={formData.medications}
-  onChange={handleChange}
-  placeholder="List any medications"
-  style={textareaStyle}
-/>
-</div>
-
-<button 
-type="submit" 
-style={buttonStyle}
-disabled={isSubmitting}
->
-{isSubmitting ? 'Creating Profile...' : 'Create Profile'}
-</button>
-
-{message && <div style={messageStyle}>{message}</div>}
-</form>
-</div>
-);
+          <div style={columnStyle}>
+            <div style={sectionStyle}>
+              <h2>Contact Information</h2>
+              
+              <label style={labelStyle}>Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                style={inputStyle}
+                required
+              />
+              
+              <label style={labelStyle}>Phone Number</label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+                style={inputStyle}
+                required
+              />
+              
+              <label style={labelStyle}>Address</label>
+              <textarea
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Enter your address"
+                style={textareaStyle}
+                required
+              />
+              
+              <label style={labelStyle}>Emergency Contact</label>
+              <input
+                type="text"
+                name="emergencyContact"
+                value={formData.emergencyContact}
+                onChange={handleChange}
+                placeholder="Name and phone number"
+                style={inputStyle}
+                required
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div style={sectionStyle}>
+          <h2>Health Information</h2>
+          
+          <label style={labelStyle}>Do you have any medical conditions?</label>
+          <textarea
+            name="medicalConditions"
+            value={formData.medicalConditions}
+            onChange={handleChange}
+            placeholder="List any medical conditions"
+            style={textareaStyle}
+          />
+          
+          <label style={labelStyle}>Are you currently taking any medications?</label>
+          <textarea
+            name="medications"
+            value={formData.medications}
+            onChange={handleChange}
+            placeholder="List any medications"
+            style={textareaStyle}
+          />
+        </div>
+        
+        <button 
+          type="submit" 
+          style={buttonStyle}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Creating Profile...' : 'Create Profile'}
+        </button>
+        
+        {message && <div style={messageStyle}>{message}</div>}
+      </form>
+    </div>
+  );
 };
 
 export default BloodDonationForm;
