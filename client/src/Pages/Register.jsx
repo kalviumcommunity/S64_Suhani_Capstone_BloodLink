@@ -85,7 +85,7 @@ export default function Register() {
             marginBottom: '16px'
           }}>
             <GoogleLogin
-            // clientId="623636336763-dsusevrkricim5npu9qdefmpbabv4ugp.apps.googleusercontent.com"
+            
               onSuccess={handleGoogleSuccess}
               onError={() => alert('Google Registration Failed')}
               shape="pill"
