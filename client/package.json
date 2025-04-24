@@ -10,10 +10,12 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "jest": {
+    "testEnvironment": "jsdom"
+  },
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/user-event": "^14.6.1",
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
@@ -32,6 +34,7 @@
     "@eslint/js": "^9.21.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
