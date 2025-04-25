@@ -9,7 +9,7 @@ import Login from './pages/Login';
 // import Header from './components/Nav';
 import Home from './pages/Home';
 import HealthTips from './pages/HealthTips';
-// import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/ProfilePage';
 import BloodDonationForm from './pages/BloodDonationForm';
 import Slot from './components/slot';
 // import Slot from '../../backend/models/Slot';
@@ -119,7 +119,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         {/* <Route path="/confirm-booking" element={< Confirmation/>} /> */}
         <Route path="/health-tips" element={<HealthTips />} />
-        {/* <Route path="/profilePage" element={<ProfilePage />} /> */}
+        <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/notification" element={<NotificationSystem />} />
         {/* <Route path="/notification-toast" element={<NotificationToast />} /> */}
         <Route path="/BloodDonationForm" element={<BloodDonationForm/>} />
