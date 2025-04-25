@@ -23,6 +23,39 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(cors());
 
+// Configure storage for multer
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    // Create uploads directory if it doesn't exist
+    const uploadDir = 'uploads/profile-photos';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function(req, file, cb) {
+    // Generate unique filename with original extension
+    const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueFilename);
+  }
+});
+
+// Configure multer for file upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
+  fileFilter: function(req, file, cb) {
+    // Accept only image files
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+  }
+});
+
+// Simple in-memory database for profiles
+// In a production app, you would use a real database like MongoDB or PostgreSQL
+const profiles = [];
 
 // ✅ Route Test (Optional Debugging Route)
 app.get('/api/test', (req, res) => {
@@ -33,13 +66,13 @@ app.get('/api/test', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const slotRoutes = require('./routes/slotRoutes');
 const centerRoutes = require('./routes/centerRoutes');
-const notifyRoutes = require('./routes/notifyRoutes');
+// const notifyRoutes = require('./routes/notifyRoutes');
 
 // ✅ Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/slots', slotRoutes);
 app.use('/api/centers', centerRoutes);
-app.use('/api/notify', notifyRoutes);
+// app.use('/api/notify', notifyRoutes);
 
 // API endpoint to create a profile
 app.post('/api/create-profile', upload.single('photo'), (req, res) => {
@@ -127,7 +160,84 @@ app.put('/api/profile/:userId', upload.single('photo'), (req, res) => {
       userId, // Ensure userId remains the same
       updatedAt: new Date()
     };
+    // Update photo if a new one was uploaded
+    if (req.file) {
+      // Delete old photo if it exists
+      if (existingProfile.photoUrl) {
+        const oldPhotoPath = path.join(__dirname, existingProfile.photoUrl);
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+      
+      // Set new photo URL
+      updatedProfile.photoUrl = `/uploads/profile-photos/${req.file.filename}`;
+    }
     
+    // Update profile in our "database"
+    profiles[profileIndex] = updatedProfile;
+    
+    console.log('Profile updated:', updatedProfile);
+    
+    // Return success response
+    res.json({
+      success: true,
+      message: 'Profile updated successfully!',
+      profile: updatedProfile
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile. ' + error.message
+    });
+  }
+});
+
+// NEW: API endpoint to delete a profile
+app.delete('/api/profile/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Find profile index in our "database"
+    const profileIndex = profiles.findIndex(p => p.userId === userId);
+    
+    if (profileIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profile not found'
+      });
+    }
+    
+    // Get the profile to be deleted
+    const profileToDelete = profiles[profileIndex];
+    
+    // Delete profile photo if it exists
+    if (profileToDelete.photoUrl) {
+      const photoPath = path.join(__dirname, profileToDelete.photoUrl);
+      if (fs.existsSync(photoPath)) {
+        fs.unlinkSync(photoPath);
+      }
+    }
+    
+    // Remove profile from our "database"
+    profiles.splice(profileIndex, 1);
+    
+    console.log('Profile deleted:', userId);
+    
+    // Return success response
+    res.json({
+      success: true,
+      message: 'Profile deleted successfully!'
+    });
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete profile. ' + error.message
+    });
+  }
+});
 
     console.log('✅ All routes registered');
 
@@ -135,7 +245,7 @@ app.put('/api/profile/:userId', upload.single('photo'), (req, res) => {
     connectDB().then(() => {
       // WebSocket setup
       setupWebSocket(server);
-      setupCleanupJob();
+      // setupCleanupJob();
       
       // Start server
       server.listen(PORT, () => {

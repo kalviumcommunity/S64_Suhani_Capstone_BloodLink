@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Nav from '../components/Nav';
 import BloodDonationForm from './BloodDonationForm';
-import FindCenters from '../components/NearbyCenters';
+// import FindCenters from '../components/NearbyCenters';
 import NotificationPage from '../components/NotificationSystem';
 
 export default function BloodDonationWebsite() {
