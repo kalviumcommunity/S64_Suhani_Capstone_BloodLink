@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-// const { saveSocket } = require('./controller/notifyController');
+const notifyController = require('./controller/notifyController');
 
 function setupWebSocket(server) {
   const io = new Server(server, {
@@ -10,7 +10,13 @@ function setupWebSocket(server) {
 
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
-    // saveSocket(socket);
+    notifyController.saveSocket(socket);
+    
+    // Handle disconnections
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+      notifyController.removeSocket(socket.id);
+    });
   });
 }
 

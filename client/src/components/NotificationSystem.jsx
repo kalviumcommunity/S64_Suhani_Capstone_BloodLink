@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+
 import { io } from 'socket.io-client';
 
 function EmergencyNotificationSystem() {
@@ -9,9 +10,11 @@ function EmergencyNotificationSystem() {
   const notificationSound = useRef(new Audio('/alert-sound.mp3'));
 
   useEffect(() => {
+
     // Connect to the server
     socketRef.current = io('http://localhost:5000');
 
+    
     // Set up event listeners
     socketRef.current.on('connect', () => {
       console.log('Connected to notification server');
@@ -47,7 +50,8 @@ function EmergencyNotificationSystem() {
       }
 
       setNotifications(prev => [newNotification, ...prev]);
-    });
+    }
+  );
 
     // Clean up on unmount
     return () => {
@@ -68,7 +72,8 @@ function EmergencyNotificationSystem() {
           ...notification,
           type: notification.type || 'general',
           additionalData: notification.additionalData || {}
-        }));
+        }
+      ));
         setNotifications(processedNotifications);
       }
     } catch (error) {
@@ -90,7 +95,8 @@ function EmergencyNotificationSystem() {
         if (permission === "granted") {
           new Notification("Emergency Blood Request", { body: message });
         }
-      });
+      }
+    );
     }
   };
 
@@ -204,6 +210,8 @@ function EmergencyNotificationSystem() {
                   
                   <small className="notification-time">{notification.timestamp}</small>
                   
+
+
                   {/* Response buttons for emergency notifications */}
                   {notification.type === 'emergency' && !notification.userResponse && (
                     <div className="response-buttons">
@@ -421,6 +429,7 @@ function EmergencyNotificationSystem() {
           to { opacity: 1; transform: translateY(0); }
         }
         
+
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
           70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
@@ -432,7 +441,6 @@ function EmergencyNotificationSystem() {
         }
       `}</style>
     </div>
-  );
-}
+  );}
 
 export default EmergencyNotificationSystem;

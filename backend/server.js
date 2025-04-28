@@ -66,7 +66,7 @@ app.get('/api/test', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const slotRoutes = require('./routes/slotRoutes');
 const centerRoutes = require('./routes/centerRoutes');
-// const notifyRoutes = require('./routes/notifyRoutes');
+const notifyRoutes = require('./routes/notifyRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 
@@ -74,7 +74,7 @@ const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/slots', slotRoutes);
 app.use('/api/centers', centerRoutes);
-// app.use('/api/notify', notifyRoutes);
+app.use('/api/notify', notifyRoutes);
 app.use('/api/ai', aiRoutes);
 
 // API endpoint to create a profile
