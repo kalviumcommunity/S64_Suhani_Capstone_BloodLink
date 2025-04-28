@@ -1,10 +1,10 @@
-// InventoryPrediction.js
+// InventoryPrediction.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
+import { Bar } from 'react-chartjs-2';
 import {
-  Chart,
+  Chart as ChartJS,
   LinearScale,
   CategoryScale,
   BarElement,
@@ -16,7 +16,7 @@ import {
 } from 'chart.js';
 
 // Register Chart.js components
-Chart.register(
+ChartJS.register(
   LinearScale,
   CategoryScale,
   BarElement,
@@ -38,12 +38,16 @@ const InventoryPrediction = () => {
     const fetchPrediction = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/ai/inventory/predict?days=${days}`);
+        
+        // Direct URL approach since Vite config doesn't have proxy
+        const backendUrl = 'http://localhost:5000'; // Change this to match your backend
+        const response = await axios.get(`${backendUrl}/api/ai/inventory/predict?days=${days}`);
+        
         setPrediction(response.data);
         setError(null);
       } catch (err) {
-        setError('Failed to load inventory prediction');
         console.error('Error fetching prediction:', err);
+        setError('Failed to load inventory prediction data from server. Please check your backend connection.');
       } finally {
         setLoading(false);
       }
@@ -187,22 +191,28 @@ const InventoryPrediction = () => {
     },
     bloodDropIcon: {
       marginRight: '5px'
+    },
+    spinner: {
+      width: '40px',
+      height: '40px',
+      margin: '0 auto',
+      borderRadius: '50%',
+      border: '4px solid #f3f3f3',
+      borderTop: '4px solid #3498db',
+      animation: 'spin 1s linear infinite'
+    },
+    spinnerText: {
+      marginTop: '15px'
     }
   };
 
   if (loading) {
-    return <div style={styles.loading}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        margin: '0 auto',
-        borderRadius: '50%',
-        border: '4px solid #f3f3f3',
-        borderTop: '4px solid #3498db',
-        animation: 'spin 1s linear infinite'
-      }}></div>
-      <div style={{marginTop: '15px'}}>Loading prediction data...</div>
-    </div>;
+    return (
+      <div style={styles.loading}>
+        <div style={styles.spinner}></div>
+        <div style={styles.spinnerText}>Loading prediction data...</div>
+      </div>
+    );
   }
 
   if (error) {
@@ -371,15 +381,15 @@ const InventoryPrediction = () => {
         </>
       )}
 
-      {/* Adding some CSS animation for the spinner */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      {/* Add CSS for animation */}
+      <style>
+        {`
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
           }
-        `
-      }} />
+        `}
+      </style>
     </div>
   );
 };

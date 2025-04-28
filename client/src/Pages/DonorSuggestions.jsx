@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
+// Import environment variables in Vite style
+const API_URL =  'http://localhost:5000'|| '';
+
 const DonorSuggestions = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,7 +38,8 @@ const DonorSuggestions = () => {
       
       try {
         setLoading(true);
-        const response = await axios.get(`/api/ai/suggest/donors/${bloodType}`);
+        // Use the API_URL environment variable for backend calls
+        const response = await axios.get(`${API_URL}/api/ai/suggest/donors/${bloodType}`);
         setSuggestions(response.data);
         setError(null);
       } catch (err) {

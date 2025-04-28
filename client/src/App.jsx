@@ -18,6 +18,9 @@ import Landingpage from './pages/Landingpage';
 // import BookingSuccess from './components/BookingSuccess';
 import NotificationSystem from './components/NotificationSystem';
 // import NotificationToast from './components/NotificationToast';
+import DonorSuggestions from './pages/DonorSuggestions';
+import InventoryPrediction from './pages/InventoryPrediction';
+import ContactUs from './pages/ContactUs'; 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -124,6 +127,9 @@ function App() {
         {/* <Route path="/notification-toast" element={<NotificationToast />} /> */}
         <Route path="/BloodDonationForm" element={<BloodDonationForm/>} />
         <Route path="/Home" element={<Home/>} />
+        <Route path="/Inventory" element={<InventoryPrediction/>} />
+        <Route path="/donor" element={<DonorSuggestions/>} />
+        <Route path="/ContactUs" element={<ContactUs/>} />
         {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
         <Route path="/login" element={
           authenticated ? <Navigate to="/profile" /> : <Login onLogin={handleLogin} />
