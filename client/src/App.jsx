@@ -21,6 +21,7 @@ import NotificationSystem from './components/NotificationSystem';
 import DonorSuggestions from './pages/DonorSuggestions';
 import InventoryPrediction from './pages/InventoryPrediction';
 import ContactUs from './pages/ContactUs'; 
+import Donation from './components/Donation';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -130,6 +131,7 @@ function App() {
         <Route path="/Inventory" element={<InventoryPrediction/>} />
         <Route path="/donor" element={<DonorSuggestions/>} />
         <Route path="/ContactUs" element={<ContactUs/>} />
+        <Route path="/Donation" element={<Donation/>} />
         {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
         <Route path="/login" element={
           authenticated ? <Navigate to="/profile" /> : <Login onLogin={handleLogin} />
