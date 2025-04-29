@@ -68,7 +68,7 @@ const slotRoutes = require('./routes/slotRoutes');
 const centerRoutes = require('./routes/centerRoutes');
 const notifyRoutes = require('./routes/notifyRoutes');
 const aiRoutes = require('./routes/aiRoutes');
-
+const donationRoutes = require('./routes/donationRoutes');
 
 // ✅ Use Routes
 app.use('/api/auth', authRoutes);
@@ -76,7 +76,7 @@ app.use('/api/slots', slotRoutes);
 app.use('/api/centers', centerRoutes);
 app.use('/api/notify', notifyRoutes);
 app.use('/api/ai', aiRoutes);
-
+app.use('/api/donation', donationRoutes);
 // API endpoint to create a profile
 app.post('/api/create-profile', upload.single('photo'), (req, res) => {
   try {
