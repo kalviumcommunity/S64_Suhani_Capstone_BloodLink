@@ -238,8 +238,10 @@ exports.getEmergencyBloodRequests = async (req, res) => {
         timestamp: notif.timestamp.toLocaleTimeString(),
         date: notif.timestamp.toISOString(),
         responses: notif.responses || []
-      }))
-    });
+      }
+    ))
+    }
+);
   } catch (error) {
     console.error('Error fetching emergency requests:', error);
     res.status(500).json({ error: 'Failed to fetch emergency requests' });
@@ -251,7 +253,8 @@ exports.cleanupExpiredNotifications = async () => {
   try {
     const result = await Notification.deleteMany({
       expiresAt: { $lte: new Date() }
-    });
+    }
+);
     
     console.log(`Cleaned up ${result.deletedCount} expired notifications`);
     return { deletedCount: result.deletedCount };
@@ -259,4 +262,5 @@ exports.cleanupExpiredNotifications = async () => {
     console.error('Error cleaning up notifications:', error);
     throw error;
   }
+
 };
