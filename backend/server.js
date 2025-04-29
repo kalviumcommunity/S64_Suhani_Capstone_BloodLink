@@ -8,7 +8,7 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const connectDB = require('./config/db');
 const { setupWebSocket } = require('./socket');
-
+const { setupCleanupJob } = require('./jobs/cleanupJob');
 
 dotenv.config();
 
@@ -248,7 +248,7 @@ app.delete('/api/profile/:userId', (req, res) => {
     connectDB().then(() => {
       // WebSocket setup
       setupWebSocket(server);
-      // setupCleanupJob();
+      setupCleanupJob();
       
       // Start server
       server.listen(PORT, () => {
