@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import Nav from '../components/Nav';
 import BloodDonationForm from './BloodDonationForm';
-// import FindCenters from '../components/NearbyCenters';
+import FindCenters from '../components/NearbyCenters';
 import NotificationPage from '../components/NotificationSystem';
+import ContactUs from '../pages/ContactUs';
+import Inventory from '../pages/InventoryPrediction';
+// import InventoryForecast from '../components/InventoryForecast';
+import DonationPage from '../components/Donation';
+import HealthTips from '../pages/HealthTips';
+import BackButton from '../components/BackButton';
 
 export default function BloodDonationWebsite() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -22,11 +28,76 @@ export default function BloodDonationWebsite() {
   const renderPage = () => {
     switch(currentPage) {
       case 'create-profile':
-        return <BloodDonationForm navigateTo={navigateTo} />;
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <BloodDonationForm navigateTo={navigateTo} />
+          </>
+        );
       case 'find-centers':
-        return <FindCenters navigateTo={navigateTo} />;
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <FindCenters navigateTo={navigateTo} />
+          </>
+        );
       case 'reminders':
-        return <NotificationPage navigateTo={navigateTo} />;
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <NotificationPage navigateTo={navigateTo} />
+          </>
+        );
+      case 'contact-us':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <ContactUs navigateTo={navigateTo} />
+          </>
+        );
+      case 'inventory':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <Inventory navigateTo={navigateTo} />
+          </>
+        );
+      case 'inventory-forecast':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            {/* <InventoryForecast navigateTo={navigateTo} /> */}
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <h2>Inventory Forecast</h2>
+              <p>This feature is coming soon.</p>
+            </div>
+          </>
+        );
+      case 'donation':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <DonationPage navigateTo={navigateTo} />
+          </>
+        );
+      case 'health-tips':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <HealthTips navigateTo={navigateTo} />
+          </>
+        );
+      case 'book-slot':
+        return (
+          <>
+            <BackButton navigateTo={navigateTo} />
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <h2>Book Donation Slot</h2>
+              <p>Select your preferred donation center and time slot.</p>
+              {/* Booking form would go here */}
+            </div>
+          </>
+        );
       default:
         return renderHomePage();
     }
@@ -63,7 +134,7 @@ export default function BloodDonationWebsite() {
                   cursor: 'pointer',
                   fontSize: '1.1rem'
                 }}
-                onClick={() => navigateTo('register')}
+                onClick={() => navigateTo('create-profile')}
               >
                 Become a Donor
               </button>
@@ -156,7 +227,7 @@ export default function BloodDonationWebsite() {
               <h3 style={{ marginBottom: '0.5rem' }}>Book Slots</h3>
               <p style={{ color: textLight }}>Schedule your donation at your preferred time and location.</p>
               <button 
-                onClick={() => navigateTo('book-slots')}
+                onClick={() => navigateTo('book-slot')}
                 style={{ 
                   marginTop: '1rem',
                   padding: '0.5rem 1rem', 
@@ -196,6 +267,103 @@ export default function BloodDonationWebsite() {
                 Set Reminders
               </button>
             </div>
+            {/* NEW Health Tips Box */}
+            <div style={{ flex: '1', minWidth: '200px', maxWidth: '250px', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ backgroundColor: '#ffebee', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ color: primaryRed, fontSize: '1.8rem' }}>💪</div>
+              </div>
+              <h3 style={{ marginBottom: '0.5rem' }}>Health Tips</h3>
+              <p style={{ color: textLight }}>Get expert advice on staying healthy before and after donation.</p>
+              <button 
+                onClick={() => navigateTo('health-tips')}
+                style={{ 
+                  marginTop: '1rem',
+                  padding: '0.5rem 1rem', 
+                  backgroundColor: primaryRed, 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer',
+                  width: '100%'
+                }}
+              >
+                View Health Tips
+              </button>
+            </div>
+
+            {/* NEW Inventory Forecast Box */}
+            <div style={{ flex: '1', minWidth: '200px', maxWidth: '250px', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ backgroundColor: '#ffebee', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ color: primaryRed, fontSize: '1.8rem' }}>📈</div>
+              </div>
+              <h3 style={{ marginBottom: '0.5rem' }}>Inventory Forecast</h3>
+              <p style={{ color: textLight }}>See predictions of future blood supply needs and plan donations accordingly.</p>
+              <button 
+                onClick={() => navigateTo('inventory-forecast')}
+                style={{ 
+                  marginTop: '1rem',
+                  padding: '0.5rem 1rem', 
+                  backgroundColor: primaryRed, 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer',
+                  width: '100%'
+                }}
+              >
+                View Forecast
+              </button>
+            </div>
+
+            <div style={{ flex: '1', minWidth: '200px', maxWidth: '250px', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ backgroundColor: '#ffebee', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ color: primaryRed, fontSize: '1.8rem' }}>📊</div>
+              </div>
+              <h3 style={{ marginBottom: '0.5rem' }}>Inventory</h3>
+              <p style={{ color: textLight }}>View current blood inventory levels and see where your donation is needed most.</p>
+              <button 
+                onClick={() => navigateTo('inventory')}
+                style={{ 
+                  marginTop: '1rem',
+                  padding: '0.5rem 1rem', 
+                  backgroundColor: primaryRed, 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer',
+                  width: '100%'
+                }}
+              >
+                Check Inventory
+              </button>
+            </div>
+
+            <div style={{ flex: '1', minWidth: '200px', maxWidth: '250px', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ backgroundColor: '#ffebee', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ color: primaryRed, fontSize: '1.8rem' }}>📞</div>
+              </div>
+              <h3 style={{ marginBottom: '0.5rem' }}>Contact Us</h3>
+              <p style={{ color: textLight }}>Have questions? Reach out to our team for assistance with any concerns.</p>
+              <button 
+                onClick={() => navigateTo('contact-us')}
+                style={{ 
+                  marginTop: '1rem',
+                  padding: '0.5rem 1rem', 
+                  backgroundColor: primaryRed, 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer',
+                  width: '100%'
+                }}
+              >
+                Contact Us
+              </button>
+            </div>
           </div>
         </div>
 
@@ -224,7 +392,7 @@ export default function BloodDonationWebsite() {
           <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '2rem', height: '400px', position: 'relative' }}>
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '150px', height: '150px', backgroundColor: 'rgba(100, 100, 255, 0.3)', borderRadius: '50%', border: '2px solid rgba(100, 100, 255, 0.5)' }}></div>
             <div style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="https://static.squareyards.com/localitymap-thumnail/lal-kothi-jaipur.png?aio=w-763;h-428;crop" alt="Map of donation centers" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="https://static.squareyards.com/localitymap-thumnail/lal-kothi-jaipur.png?aio=w-763;h-428;crop;" alt="Map of donation centers" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'white', padding: '5px 10px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
                 <p style={{ margin: '0', fontSize: '0.9rem' }}>12 centers found</p>
               </div>
@@ -316,7 +484,7 @@ export default function BloodDonationWebsite() {
           I got a second chance at life because of BloodLink. Today, I choose to give someone else that chance. Want to join me? You can donate money and make it happen.
           </p>
           <button 
-            onClick={() => navigateTo('register')}
+            onClick={() => navigateTo('donation')}
             style={{ 
               padding: '1rem 2.5rem', 
               backgroundColor: 'white', 
@@ -354,41 +522,46 @@ export default function BloodDonationWebsite() {
               <ul style={{ listStyle: 'none', padding: '0', margin: '0' }}>
                 <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('home'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Home</a></li>
                 <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('find-centers'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Find Centers</a></li>
-                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('dashboard'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Dashboard</a></li>
+                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('inventory-forecast'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Inventory Forecast</a></li>
               </ul>
             </div>
             
             <div style={{ flex: '1', minWidth: '150px' }}>
               <h4 style={{ marginBottom: '1rem' }}>Resources</h4>
               <ul style={{ listStyle: 'none', padding: '0', margin: '0' }}>
-                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('eligibility'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Eligibility Criteria</a></li>
                 <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('health-tips'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Health Tips</a></li>
-                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('faq'); }} style={{ color: '#ccc', textDecoration: 'none' }}>FAQ</a></li>
+                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('inventory'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Inventory</a></li>
+                <li style={{ marginBottom: '0.5rem' }}><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('contact-us'); }} style={{ color: '#ccc', textDecoration: 'none' }}>Contact Us</a></li>
               </ul>
             </div>
             
-            <div style={{ flex: '1', minWidth: '200px' }}>
+            {/* <div style={{ flex: '1', minWidth: '200px' }}>
               <h4 style={{ marginBottom: '1rem' }}>Contact</h4>
               <ul style={{ listStyle: 'none', padding: '0', margin: '0' }}>
                 <li style={{ marginBottom: '0.5rem' }}>Email: contact@bloodlink.com</li>
-                <li style={{ marginBottom: '0.5rem' }}>Phone: (123) 456-7890</li>
-                <li style={{ marginBottom: '0.5rem' }}>Emergency: (123) 456-7899</li>
-              </ul>
-            </div>
+                <li style={{ marginBottom: '0 */}
+            <div style={{ flex: '1', minWidth: '200px' }}>
+            <h4 style={{ marginBottom: '1rem' }}>Contact</h4>
+            <ul style={{ listStyle: 'none', padding: '0', margin: '0' }}>
+              <li style={{ marginBottom: '0.5rem' }}>Email: contact@bloodlink.com</li>
+              <li style={{ marginBottom: '0.5rem' }}>Phone: (123) 456-7890</li>
+              <li style={{ marginBottom: '0.5rem' }}>Emergency: (123) 456-7899</li>
+            </ul>
           </div>
-          
-          <div style={{ borderTop: '1px solid #555', marginTop: '2rem', paddingTop: '1rem', textAlign: 'center', fontSize: '0.8rem', color: '#999' }}>
-            <p>© 2025 BloodLink Inc. | <a href="#" style={{ color: '#999' }}>Privacy Policy</a> | <a href="#" style={{ color: '#999' }}>Terms of Service</a></p>
-          </div>
-        </footer>
-      </>
-    );
-  };
-
-  return (
-    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '100%', margin: '0 auto', color: textDark }}>
-      <Nav currentPage={currentPage} navigateTo={navigateTo} />
-      {renderPage()}
-    </div>
+        </div>
+        
+        <div style={{ borderTop: '1px solid #555', marginTop: '2rem', paddingTop: '1rem', textAlign: 'center', fontSize: '0.8rem', color: '#999' }}>
+          <p>© 2025 BloodLink Inc. | <a href="#" style={{ color: '#999' }}>Privacy Policy</a> | <a href="#" style={{ color: '#999' }}>Terms of Service</a></p>
+        </div>
+      </footer>
+    </>
   );
+};
+
+return (
+  <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '100%', margin: '0 auto', color: textDark }}>
+    <Nav currentPage={currentPage} navigateTo={navigateTo} />
+    {renderPage()}
+  </div>
+);
 }

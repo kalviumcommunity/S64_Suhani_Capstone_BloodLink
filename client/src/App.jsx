@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import Centers from './components/NearbyCenters';
+import Centers from './components/NearbyCenters';
 import Register from './pages/Register';
 import Login from './pages/Login';
 // import Dashboard from './pages/Dashboard';
@@ -13,7 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 import BloodDonationForm from './pages/BloodDonationForm';
 import Slot from './components/slot';
 // import Slot from '../../backend/models/Slot';
-// import Confirmation from './components/Confirmation';
+import Confirmation from './components/Confirmation';
 import Landingpage from './pages/Landingpage';
 // import BookingSuccess from './components/BookingSuccess';
 import NotificationSystem from './components/NotificationSystem';
@@ -117,11 +117,11 @@ function App() {
       {/* <Header user={user} onLogout={handleLogout} /> */}
       
       <Routes>
-        {/* <Route path="/find-centers" element={<Centers />} />
-        <Route path="/book-slot" element={<Slot/>} /> */}
+        <Route path="/find-centers" element={<Centers />} />
+        <Route path="/book-slot" element={<Slot/>} />
         <Route path="/" element={<Landingpage/>} />
         <Route path="/register" element={<Register />} />
-        {/* <Route path="/confirm-booking" element={< Confirmation/>} /> */}
+        <Route path="/confirm-booking" element={< Confirmation/>} />
         <Route path="/health-tips" element={<HealthTips />} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/notification" element={<NotificationSystem />} />

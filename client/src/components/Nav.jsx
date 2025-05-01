@@ -33,34 +33,21 @@ export default function Navbar() {
           textDecoration: 'none'
         }}>BloodLink</Link>
       </div>
-      
+
       <div style={{
         display: 'flex',
         alignItems: 'center'
       }}>
-        <Link to="/" style={{
-          margin: '0 16px',
-          color: '#111827',
-          textDecoration: 'none'
-        }}>Home</Link>
-        <Link to="/find-centers" style={{
-          margin: '0 16px',
-          color: '#111827',
-          textDecoration: 'none'
-        }}>Find Centers</Link>
-        <Link to="/book-slot" style={{
-          margin: '0 16px',
-          color: '#111827',
-          textDecoration: 'none'
-        }}>Book Slot</Link>
-        <Link to="/health-tips" style={{
-          margin: '0 16px',
-          color: '#111827',
-          textDecoration: 'none'
-        }}>HealthTips</Link>
+        <Link to="/home" style={linkStyle}>Home</Link>
+        <Link to="/find-centers" style={linkStyle}>Find Centers</Link>
+        <Link to="/book-slot" style={linkStyle}>Book Slot</Link>
+        <Link to="/health-tips" style={linkStyle}>HealthTips</Link>
+        <Link to="/inventory-forecast" style={linkStyle}>Inventory Forecast</Link>
+        <Link to="/inventory" style={linkStyle}>Inventory</Link>
+        <Link to="/ContactUs" style={linkStyle}>Contact Us</Link>
       </div>
-      
-      <Link to="/login" style={{
+
+      <Link to="/" style={{
         backgroundColor: '#ef4444',
         color: 'white',
         padding: '8px 16px',
@@ -68,7 +55,13 @@ export default function Navbar() {
         textDecoration: 'none',
         fontWeight: '500',
         fontSize: '14px'
-      }}>Login / Register</Link>
+      }}>Logout</Link>
     </nav>
   );
 }
+
+const linkStyle = {
+  margin: '0 16px',
+  color: '#111827',
+  textDecoration: 'none'
+};
