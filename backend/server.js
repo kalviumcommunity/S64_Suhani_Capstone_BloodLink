@@ -9,7 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const connectDB = require('./config/db');
 const { setupWebSocket } = require('./socket');
 const { setupCleanupJob } = require('./jobs/cleanupJob');
-
+const { apiLimiter } = require('./middleware/rateLimitMiddleware');
 dotenv.config();
 
 // Create Express app
@@ -22,7 +22,9 @@ const server = http.createServer(app);
 // Middleware
 app.use(express.json());
 app.use(cors());
-
+app.use('/uploads', express.static('uploads'));
+app.set('trust proxy', 1);
+app.use(apiLimiter);
 // Configure storage for multer
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
