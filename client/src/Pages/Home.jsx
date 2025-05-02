@@ -5,7 +5,7 @@ import FindCenters from '../components/NearbyCenters';
 import NotificationPage from '../components/NotificationSystem';
 import ContactUs from '../pages/ContactUs';
 import Inventory from '../pages/InventoryPrediction';
-// import InventoryForecast from '../components/InventoryForecast';
+import InventoryForecast from '../components/InventoryForecast';
 import DonationPage from '../components/Donation';
 import HealthTips from '../pages/HealthTips';
 import BackButton from '../components/BackButton';
@@ -66,7 +66,7 @@ export default function BloodDonationWebsite() {
         return (
           <>
             <BackButton navigateTo={navigateTo} />
-            {/* <InventoryForecast navigateTo={navigateTo} /> */}
+            <InventoryForecast navigateTo={navigateTo} />
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <h2>Inventory Forecast</h2>
               <p>This feature is coming soon.</p>
