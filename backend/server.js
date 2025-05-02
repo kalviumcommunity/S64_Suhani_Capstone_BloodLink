@@ -11,6 +11,11 @@ const { setupWebSocket } = require('./socket');
 const { setupCleanupJob } = require('./jobs/cleanupJob');
 const { apiLimiter } = require('./middleware/rateLimitMiddleware');
 dotenv.config();
+console.log('Environment variables loaded:');
+console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'Set' : 'Not set');
+console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 
 // Create Express app
 const app = express();
@@ -21,7 +26,12 @@ const server = http.createServer(app);
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use('/uploads', express.static('uploads'));
 app.set('trust proxy', 1);
 app.use(apiLimiter);
@@ -71,6 +81,7 @@ const centerRoutes = require('./routes/centerRoutes');
 const notifyRoutes = require('./routes/notifyRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const donationRoutes = require('./routes/donationRoutes');
+const langchainRoutes = require('./routes/langchainRoutes'); 
 
 // ✅ Use Routes
 app.use('/api/auth', authRoutes);
@@ -79,6 +90,8 @@ app.use('/api/centers', centerRoutes);
 app.use('/api/notify', notifyRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/donation', donationRoutes);
+app.use('/api/langchain', langchainRoutes); 
+
 // API endpoint to create a profile
 app.post('/api/create-profile', upload.single('photo'), (req, res) => {
   try {

@@ -22,6 +22,8 @@ import DonorSuggestions from './pages/DonorSuggestions';
 import InventoryPrediction from './pages/InventoryPrediction';
 import ContactUs from './pages/ContactUs'; 
 import Donation from './components/Donation';
+import InventoryForecast from './components/InventoryForecast';
+import SmartDonorMatching from './components/SmartDonorMatching';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -132,6 +134,8 @@ function App() {
         <Route path="/donor" element={<DonorSuggestions/>} />
         <Route path="/ContactUs" element={<ContactUs/>} />
         <Route path="/Donation" element={<Donation/>} />
+        <Route path="/inventory-forecast" element={<InventoryForecast />} />
+        <Route path="/donor-matching/:requestId" element={<SmartDonorMatching />} />
         {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
         <Route path="/login" element={
           authenticated ? <Navigate to="/profile" /> : <Login onLogin={handleLogin} />
