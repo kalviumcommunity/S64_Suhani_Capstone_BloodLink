@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
-
+import Nav from '../components/Nav';
 // Extract backend URL to make it configurable
 // const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
@@ -129,6 +129,8 @@ function EmergencyNotificationSystem() {
   });
 
   return (
+    <>
+    <Nav />
     <div className="notification-container">
       <h1 className="notification-header">
         Emergency Notification System
@@ -435,6 +437,7 @@ function EmergencyNotificationSystem() {
         }
       `}</style>
     </div>
+    </>
   );
 }
 

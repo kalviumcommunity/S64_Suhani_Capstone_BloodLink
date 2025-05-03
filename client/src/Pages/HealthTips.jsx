@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, Clock, AlertTriangle, X, DropletIcon, Thermometer, CircleHelp } from 'lucide-react';
-
+import Nav from '../components/Nav';
 export default function BloodDonorInfoPage() {
   const [activeTab, setActiveTab] = useState('eligible');
   
@@ -420,7 +420,8 @@ export default function BloodDonorInfoPage() {
     </div>
   );
 
-  return (
+  return (  <>
+    <Nav /> 
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
@@ -455,5 +456,6 @@ export default function BloodDonorInfoPage() {
         {activeTab === 'eligible' ? renderEligibleContent() : renderIneligibleContent()}
       </div>
     </div>
+    </>
   );
 }

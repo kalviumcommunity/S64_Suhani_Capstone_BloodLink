@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-
+import Nav from '../components/Nav';
 const api = axios.create({
   baseURL: import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000', // Replace with your actual API URL
 });
@@ -308,6 +308,8 @@ export default function ConfirmBooking() {
     },
   };
   return (
+    <>
+    <Nav />
         <div style={styles.container}>
           <div style={styles.title}>Book Your Blood Donation Slot</div>
     
@@ -445,6 +447,7 @@ export default function ConfirmBooking() {
             </button>
           </div>
         </div>
+        </>
       );
     }
 //   return (

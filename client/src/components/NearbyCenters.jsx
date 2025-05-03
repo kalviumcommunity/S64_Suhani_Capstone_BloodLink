@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Nav from '../components/Nav';
 
 // Extract backend URL to make it configurable
 // const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
-
 export default function NearbyCenters() {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -232,7 +232,10 @@ export default function NearbyCenters() {
   };
 
   return (
+    <>
+    <Nav />
     <div style={styles.container}>
+      
       <h2 style={styles.title}>🏥 Find a Blood Donation Center Near You</h2>
 
       <div style={styles.stepper}>
@@ -314,5 +317,6 @@ export default function NearbyCenters() {
         )}
       </div>
     </div>
+    </>
   );
 }

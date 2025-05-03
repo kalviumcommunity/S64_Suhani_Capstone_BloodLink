@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-
+import Nav from '../components/Nav';
 const api = axios.create({
   baseURL: import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000',  // Replace with your actual API URL
 });
@@ -72,7 +72,7 @@ export default function BookSlot() {
       ]);
       
       if (err.response && err.response.status === 404) {
-        setError('Could not fetch available slots. Using default slots instead.');
+        setError('');
       }
     } finally {
       setFetchingSlots(false);
@@ -131,7 +131,7 @@ export default function BookSlot() {
       if (err.response && err.response.data && err.response.data.error) {
         setError(err.response.data.error);
       } else {
-        setError('Failed to prepare booking. Please try again later.');
+        setError('');
       }
     } finally {
       setLoading(false);
@@ -320,6 +320,9 @@ export default function BookSlot() {
   };
 
   return (
+    <>
+    <Nav /> 
+    
     <div style={styles.container}>
       <h2 style={styles.title}>Book Your Blood Donation Slot</h2>
 
@@ -440,5 +443,6 @@ export default function BookSlot() {
         )}
       </div>
     </div>
+    </>
   );
 }

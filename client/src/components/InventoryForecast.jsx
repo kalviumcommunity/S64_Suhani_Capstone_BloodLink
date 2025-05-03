@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { inventoryForecastService } from '../services/langchainService';
 import { Bar } from 'react-chartjs-2';
+import Nav from '../components/Nav';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -154,6 +155,8 @@ const InventoryForecast = () => {
   const chartData = prepareChartData();
 
   return (
+    <>
+    <Nav />
     <div className="space-y-8 p-8 max-w-7xl mx-auto bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-gray-800">Blood Inventory Forecast</h2>
@@ -193,7 +196,9 @@ const InventoryForecast = () => {
         </div>
       )}
     </div>
+    </>
   );
+  
 };
 
 export default InventoryForecast; 

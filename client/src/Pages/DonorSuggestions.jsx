@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useSearchParams } from 'react-router-dom';
-
+import Nav from '../components/Nav';
 // Import environment variables in Vite style
 const API_URL =  import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000'|| '';
 
@@ -236,6 +236,8 @@ const DonorSuggestions = () => {
   };
 
   return (
+    <>
+    <Nav /> 
     <div style={styles.container}>
       <h2 style={styles.header}>Donor Suggestions</h2>
       
@@ -390,6 +392,7 @@ const DonorSuggestions = () => {
         `
       }} />
     </div>
+    </>
   );
 };
 

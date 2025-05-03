@@ -1,7 +1,7 @@
 // BloodDonationForm.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import Nav from '../components/Nav';
 // Define backend URL as a constant
 // const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
@@ -204,6 +204,8 @@ const BloodDonationForm = () => {
   };
 
   return (
+    <>
+    <Nav />
     <div style={formContainerStyle}>
       <h1 style={{ color: '#dc3545', textAlign: 'center', marginBottom: '30px' }}>
         BloodLink Registration
@@ -381,6 +383,7 @@ const BloodDonationForm = () => {
         {message && <div style={messageStyle}>{message}</div>}
       </form>
     </div>
+    </>
   );
 };
 

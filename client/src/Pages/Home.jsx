@@ -30,67 +30,73 @@ export default function BloodDonationWebsite() {
       case 'create-profile':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            {/* <BackButton navigateTo={navigateTo} /> */}
             <BloodDonationForm navigateTo={navigateTo} />
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'find-centers':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            
             <FindCenters navigateTo={navigateTo} />
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'reminders':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            
             <NotificationPage navigateTo={navigateTo} />
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'contact-us':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            
             <ContactUs navigateTo={navigateTo} />
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'inventory':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            
             <Inventory navigateTo={navigateTo} />
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'inventory-forecast':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            
             <InventoryForecast navigateTo={navigateTo} />
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <h2>Inventory Forecast</h2>
               <p>This feature is coming soon.</p>
             </div>
+            <BackButton navigateTo={navigateTo} />
           </>
         );
       case 'donation':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
-            <DonationPage navigateTo={navigateTo} />
+            
+            <DonationPage navigateTo={navigateTo} /><BackButton navigateTo={navigateTo} />
           </>
         );
       case 'health-tips':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
-            <HealthTips navigateTo={navigateTo} />
+            
+            <HealthTips navigateTo={navigateTo} /><BackButton navigateTo={navigateTo} />
           </>
         );
       case 'book-slot':
         return (
           <>
-            <BackButton navigateTo={navigateTo} />
+            {/* <BackButton navigateTo={navigateTo} /> */}
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <h2>Book Donation Slot</h2>
               <p>Select your preferred donation center and time slot.</p>
@@ -106,6 +112,7 @@ export default function BloodDonationWebsite() {
   const renderHomePage = () => {
     return (
       <>
+      <Nav />
         {/* Hero Section - Made larger */}
         <div style={{ 
           backgroundColor: primaryRed, 
@@ -560,7 +567,7 @@ export default function BloodDonationWebsite() {
 
 return (
   <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '100%', margin: '0 auto', color: textDark }}>
-    <Nav currentPage={currentPage} navigateTo={navigateTo} />
+    {/* <Nav /> */}
     {renderPage()}
   </div>
 );

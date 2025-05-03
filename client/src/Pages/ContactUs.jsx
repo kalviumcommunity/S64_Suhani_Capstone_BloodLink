@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Spline from '@splinetool/react-spline';
+import Nav from '../components/Nav';
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -131,6 +132,8 @@ export default function ContactUs() {
   };
 
   return (
+    <>
+    <Nav /> 
     <div style={containerStyle}>
       
       {/* Left: Spline Animation */}
@@ -204,5 +207,6 @@ export default function ContactUs() {
         </div>
       </div>
     </div>
+    </>
   );
 }
