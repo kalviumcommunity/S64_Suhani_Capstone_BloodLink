@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000'  // Replace with your actual API URL
+  baseURL: import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000',  // Replace with your actual API URL
 });
 
 export default function BookSlot() {

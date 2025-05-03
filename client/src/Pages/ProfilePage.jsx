@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+// Define backend URL as a constant
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
 
 const ProfilePage = () => {
   const { userId } = useParams();
@@ -164,7 +167,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/profile/${userId}`);
+        const response = await axios.get(`${BACKEND_URL}/api/profile/${userId}`);
         setProfile(response.data.profile);
         setEditedProfile(response.data.profile);
       } catch (err) {
@@ -207,7 +210,7 @@ const ProfilePage = () => {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/profile/${userId}`, editedProfile);
+      const response = await axios.put(`${BACKEND_URL}/api/profile/${userId}`, editedProfile);
       setProfile(response.data.profile);
       setIsEditing(false);
       alert('Profile updated successfully!');
@@ -219,7 +222,7 @@ const ProfilePage = () => {
 
   const handleDeleteProfile = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/profile/${userId}`);
+      await axios.delete(`${BACKEND_URL}/api/profile/${userId}`);
       alert('Profile deleted successfully!');
       // Redirect to home page or login page after deletion
       navigate('/');
@@ -265,7 +268,7 @@ const ProfilePage = () => {
         <>
           <div style={headerStyle}>
             <img 
-              src={profile.photoUrl ? `http://localhost:5000${profile.photoUrl}` : 'https://via.placeholder.com/150'} 
+              src={profile.photoUrl ? `${BACKEND_URL}${profile.photoUrl}` : 'https://via.placeholder.com/150'} 
               alt={profile.fullName} 
               style={photoStyle} 
             />

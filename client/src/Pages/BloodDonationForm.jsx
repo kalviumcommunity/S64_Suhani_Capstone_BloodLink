@@ -2,6 +2,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+// Define backend URL as a constant
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
+
 const BloodDonationForm = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -62,7 +66,7 @@ const BloodDonationForm = () => {
         formDataToSend.append('photo', photo);
       }
       
-      const response = await axios.post('http://localhost:5000/api/create-profile', formDataToSend, {
+      const response = await axios.post(`${BACKEND_URL}/api/create-profile`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

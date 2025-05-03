@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
 // Import environment variables in Vite style
-const API_URL =  'http://localhost:5000'|| '';
+const API_URL =  import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000'|| '';
 
 const DonorSuggestions = () => {
   const location = useLocation();

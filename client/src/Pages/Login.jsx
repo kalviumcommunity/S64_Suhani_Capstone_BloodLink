@@ -2,9 +2,11 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-// import Nav from '../components/Navbar'; // import your nav component
 import Navbar from '../components/Navbar';
 
+// Define backend URL constant using environment variable with fallback
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form);
+      const res = await axios.post(`${BACKEND_URL}/api/auth/login`, form);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userId', res.data.user._id);
       navigate('/home');
@@ -26,7 +28,7 @@ export default function Login() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/google-login', {
+      const res = await axios.post(`${BACKEND_URL}/api/auth/google-login`, {
         tokenId: credentialResponse.credential
       });
       localStorage.setItem('token', res.data.token);

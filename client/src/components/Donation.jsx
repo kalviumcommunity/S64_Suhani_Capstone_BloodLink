@@ -6,8 +6,8 @@ import axios from 'axios';
 const RAZORPAY_KEY_ID = '';
 
 // Backend URL configuration - replace with your actual backend URL
-const BACKEND_URL = 'http://localhost:5000'; // Default local development URL
-
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Default local development URL
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
 const Donation = () => {
   const [amount, setAmount] = useState(100);
   const [loading, setLoading] = useState(false);

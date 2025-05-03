@@ -40,7 +40,7 @@ const InventoryPrediction = () => {
         setLoading(true);
         
         // Direct URL approach since Vite config doesn't have proxy
-        const backendUrl = 'http://localhost:5000'; // Change this to match your backend
+        const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Change this to match your backend
         const response = await axios.get(`${backendUrl}/api/ai/inventory/predict?days=${days}`);
         
         setPrediction(response.data);

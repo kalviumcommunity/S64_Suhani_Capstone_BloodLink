@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-
 import { io } from 'socket.io-client';
 
+// Extract backend URL to make it configurable
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
 function EmergencyNotificationSystem() {
   const [notifications, setNotifications] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -10,10 +12,8 @@ function EmergencyNotificationSystem() {
   const notificationSound = useRef(new Audio('/alert-sound.mp3'));
 
   useEffect(() => {
-
     // Connect to the server
-    socketRef.current = io('http://localhost:5000');
-
+    socketRef.current = io(BACKEND_URL);
     
     // Set up event listeners
     socketRef.current.on('connect', () => {
@@ -50,8 +50,7 @@ function EmergencyNotificationSystem() {
       }
 
       setNotifications(prev => [newNotification, ...prev]);
-    }
-  );
+    });
 
     // Clean up on unmount
     return () => {
@@ -64,7 +63,7 @@ function EmergencyNotificationSystem() {
   // Function to fetch existing notifications
   const fetchExistingNotifications = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/notify/all');
+      const response = await fetch(`${BACKEND_URL}/api/notify/all`);
       const data = await response.json();
       if (data.notifications) {
         // Add type property if it doesn't exist
@@ -72,8 +71,7 @@ function EmergencyNotificationSystem() {
           ...notification,
           type: notification.type || 'general',
           additionalData: notification.additionalData || {}
-        }
-      ));
+        }));
         setNotifications(processedNotifications);
       }
     } catch (error) {
@@ -95,8 +93,7 @@ function EmergencyNotificationSystem() {
         if (permission === "granted") {
           new Notification("Emergency Blood Request", { body: message });
         }
-      }
-    );
+      });
     }
   };
 
@@ -106,7 +103,7 @@ function EmergencyNotificationSystem() {
     console.log(`User responded to notification ${notificationId} with: ${response}`);
     
     // Example implementation - update the server
-    fetch('http://localhost:5000/api/notify/respond', {
+    fetch(`${BACKEND_URL}/api/notify/respond`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -210,8 +207,6 @@ function EmergencyNotificationSystem() {
                   
                   <small className="notification-time">{notification.timestamp}</small>
                   
-
-
                   {/* Response buttons for emergency notifications */}
                   {notification.type === 'emergency' && !notification.userResponse && (
                     <div className="response-buttons">
@@ -429,7 +424,6 @@ function EmergencyNotificationSystem() {
           to { opacity: 1; transform: translateY(0); }
         }
         
-
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
           70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
@@ -441,6 +435,7 @@ function EmergencyNotificationSystem() {
         }
       `}</style>
     </div>
-  );}
+  );
+}
 
 export default EmergencyNotificationSystem;

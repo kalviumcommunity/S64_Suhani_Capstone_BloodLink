@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+// Extract backend URL to make it configurable
+// const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function NearbyCenters() {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +27,7 @@ export default function NearbyCenters() {
         
         try {
           console.log(`Fetching hospitals at lat:${latitude}, lng:${longitude}`);
-          const response = await axios.get('/api/centers/nearby', {
+          const response = await axios.get(`${BACKEND_URL}/api/centers/nearby`, {
             params: { lat: latitude, lng: longitude },
           });
           
@@ -63,7 +67,7 @@ export default function NearbyCenters() {
     
     try {
       console.log(`Searching for hospitals near: ${manualLocation}`);
-      const response = await axios.get('/api/centers/search', {
+      const response = await axios.get(`${BACKEND_URL}/api/centers/search`, {
         params: { query: manualLocation },
       });
       
