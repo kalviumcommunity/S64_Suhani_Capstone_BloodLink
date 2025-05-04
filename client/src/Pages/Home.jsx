@@ -3,11 +3,11 @@ import Nav from '../components/Nav';
 import BloodDonationForm from './BloodDonationForm';
 import FindCenters from '../components/NearbyCenters';
 import NotificationPage from '../components/NotificationSystem';
-import ContactUs from '../pages/ContactUs';
-import Inventory from '../pages/InventoryPrediction';
+import ContactUs from './ContactUs';
+import Inventory from './InventoryPrediction';
 import InventoryForecast from '../components/InventoryForecast';
 import DonationPage from '../components/Donation';
-import HealthTips from '../pages/HealthTips';
+import HealthTips from './HealthTips';
 import BackButton from '../components/BackButton';
 
 export default function BloodDonationWebsite() {
