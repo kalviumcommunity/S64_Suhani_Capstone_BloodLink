@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import HealthTips from './HealthTips';
+import HealthTips from './Pages/HealthTips';
 
 describe('HealthTips', () => {
   // Test 1: Renders header content correctly
