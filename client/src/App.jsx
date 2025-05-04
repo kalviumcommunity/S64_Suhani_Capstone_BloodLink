@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Centers from './components/NearbyCenters';
-import Register from './pages/Register';
-import Login from './pages/Login';
+import Register from './pages/Register.jsx';
+import Login from './pages/Login.jsx';
 // import Dashboard from './pages/Dashboard';
 // import Profile from './components/Profile';
 // import EditProfile from './components/EditProfile';
