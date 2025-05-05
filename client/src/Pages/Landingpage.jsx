@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar'; 
-
+import BloodImage from '../assets/Blood.png';
 export default function BloodDonationWebsite() {
   const [currentPage, setCurrentPage] = useState('home');
   
@@ -70,7 +70,8 @@ export default function BloodDonationWebsite() {
         </div>
         <div style={{ flex: '1', maxWidth: '500px' }}>
           <img 
-            src="https://bloodonwheels.in/wp-content/uploads/2023/07/Mask-group-8.png" 
+            // src="https://bloodonwheels.in/wp-content/uploads/2023/07/Mask-group-8.png" 
+            src={BloodImage}
             alt="Blood donation process" 
             style={{ width: '100%', borderRadius: '8px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
           />
