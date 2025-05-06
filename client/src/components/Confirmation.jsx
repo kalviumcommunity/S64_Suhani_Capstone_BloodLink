@@ -105,7 +105,7 @@ export default function ConfirmBooking() {
           setError('Your session has expired. Please log in again.');
           navigate('/login');
         } else {
-          setError(err.response.data?.error || 'Failed to confirm appointment. Please try again.');
+          setError(err.response.data?.error || ' ');
         }
       } else {
         setError('Failed to connect to server. Please check your internet connection.');
