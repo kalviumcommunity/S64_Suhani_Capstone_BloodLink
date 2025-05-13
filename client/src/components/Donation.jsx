@@ -4,7 +4,7 @@ import Nav from '../components/Nav';
 
 // IMPORTANT: Replace this with your actual Razorpay test key ID from your dashboard
 // Test mode keys start with 'rzp_test_'
-const RAZORPAY_KEY_ID = 'import.meta.env.VITE_RAZORPAY_KEY_ID';
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
 // Backend URL configuration - replace with your actual backend URL
 // const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Default local development URL
