@@ -167,11 +167,8 @@ export default function BloodDonationWebsite() {
               // src="https://bloodonwheels.in/wp-content/uploads/2023/07/Mask-group-8.png"
               src={BloodImage}
               alt="Blood donation process" 
-              width="1200"
-  height="600"
-  loading="eager"
-
-              style={{ borderRadius: '8px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+              
+              style={{ width: '100%', borderRadius: '8px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
             />
           </div>
         </div>
