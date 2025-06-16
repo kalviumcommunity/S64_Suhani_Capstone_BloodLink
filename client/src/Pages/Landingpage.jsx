@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar'; 
-import BloodImage from '../assets/Blood.png';
+import BloodImage from '../assets/Blood.webp';
 export default function BloodDonationWebsite() {
   const [currentPage, setCurrentPage] = useState('home');
   

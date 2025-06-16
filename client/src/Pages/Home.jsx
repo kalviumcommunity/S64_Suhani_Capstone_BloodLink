@@ -9,7 +9,7 @@ import InventoryForecast from '../components/InventoryForecast';
 import DonationPage from '../components/Donation';
 import HealthTips from './HealthTips';
 import BackButton from '../components/BackButton';
-import BloodImage from '../assets/Blood.png';
+import BloodImage from '../assets/Blood.webp';
 export default function BloodDonationWebsite() {
   const [currentPage, setCurrentPage] = useState('home');
   
@@ -167,7 +167,11 @@ export default function BloodDonationWebsite() {
               // src="https://bloodonwheels.in/wp-content/uploads/2023/07/Mask-group-8.png"
               src={BloodImage}
               alt="Blood donation process" 
-              style={{ width: '100%', borderRadius: '8px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+              width="1200"
+  height="600"
+  loading="eager"
+
+              style={{ borderRadius: '8px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
             />
           </div>
         </div>
