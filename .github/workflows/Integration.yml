@@ -23,10 +23,13 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+      working-directory: ./client
     - name: "Installing Dependencies"
       run: npm i
+      working-directory: ./client
     - name: "Build command"
       run: npm run build
+      working-directory: ./client
   unit-test:
     runs-on: ubuntu-latest
 
@@ -42,8 +45,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+      working-directory: ./client
     - name: "Installing Dependencies"
       run: npm i
+      working-directory: ./client
     - name: "Running test cases"
       run: npm run test
+      working-directory: ./client
     
