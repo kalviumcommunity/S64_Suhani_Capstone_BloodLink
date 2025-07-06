@@ -23,7 +23,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-      working-directory: ./client
+        cache-dependency-path: ./client/package-lock.json
     - name: "Installing Dependencies"
       run: npm i
       working-directory: ./client
@@ -45,7 +45,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-      working-directory: ./client
+        cache-dependency-path: ./client/package-lock.json
     - name: "Installing Dependencies"
       run: npm i
       working-directory: ./client
