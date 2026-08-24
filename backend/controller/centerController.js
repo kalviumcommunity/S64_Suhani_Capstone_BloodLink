@@ -2,7 +2,7 @@ const foursquare = require('../utils/foursquare');
 
 /**
  * GET /api/centers/nearby?lat=...&lng=...
- * Fetch hospitals near the user's current location.
+ * Fetch nearby hospitals using the Foursquare Places API
  */
 const getNearbyCenters = async (req, res) => {
   try {
@@ -19,9 +19,10 @@ const getNearbyCenters = async (req, res) => {
     const latitude = Number(lat);
     const longitude = Number(lng);
 
+    // Check if coordinates are valid numbers
     if (
-      Number.isNaN(latitude) ||
-      Number.isNaN(longitude) ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
       latitude < -90 ||
       latitude > 90 ||
       longitude < -180 ||
@@ -37,42 +38,44 @@ const getNearbyCenters = async (req, res) => {
       `Fetching hospitals near lat: ${latitude}, lng: ${longitude}`
     );
 
-    const response = await foursquare.get('/search', {
+    // Call Foursquare API
+    const response = await foursquare.get('/places/search', {
       params: {
         ll: `${latitude},${longitude}`,
         query: 'hospital',
         radius: 10000,
-        limit: 50,
-        sort: 'distance',
-
-        // Explicitly request useful fields
-        fields:
-          'fsq_place_id,name,location,latitude,longitude,distance,categories,tel,website',
+        limit: 20,
       },
     });
 
     const centers = response.data?.results || [];
 
-    console.log(`Found ${centers.length} hospitals`);
-
-    return res.status(200).json({
-      success: true,
-      count: centers.length,
-      results: centers,
-    });
-  } catch (error) {
-    console.error(
-      'Foursquare API error:',
-      error.response?.data || error.message
+    console.log(
+      `Foursquare response status: ${response.status}`
     );
+
+    console.log(
+      `Hospitals found: ${centers.length}`
+    );
+
+    // Return array directly so your existing frontend
+    // continues to work without changes
+    return res.status(200).json(centers);
+
+  } catch (error) {
+    console.error('Foursquare request failed');
+
+    console.error({
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
 
     return res.status(502).json({
       success: false,
       message: 'Failed to fetch nearby hospitals',
-      error:
-        error.response?.data?.message ||
-        error.response?.data?.meta?.errorDetail ||
-        error.message,
+      details: error.response?.data || error.message,
     });
   }
 };
@@ -80,12 +83,13 @@ const getNearbyCenters = async (req, res) => {
 
 /**
  * GET /api/centers/search?query=Jaipur
- * Search hospitals in a particular city/place.
+ * Search hospitals by city or place name
  */
 const searchCentersByPlace = async (req, res) => {
   try {
     const { query } = req.query;
 
+    // Validate query
     if (!query || !query.trim()) {
       return res.status(400).json({
         success: false,
@@ -93,46 +97,44 @@ const searchCentersByPlace = async (req, res) => {
       });
     }
 
-    const searchQuery = query.trim();
+    const searchLocation = query.trim();
 
-    console.log(`Searching hospitals in: ${searchQuery}`);
+    console.log(
+      `Searching hospitals near: ${searchLocation}`
+    );
 
-    const response = await foursquare.get('/search', {
+    // Call Foursquare API
+    const response = await foursquare.get('/places/search', {
       params: {
-        near: searchQuery,
+        near: searchLocation,
         query: 'hospital',
-        limit: 50,
-        sort: 'relevance',
-
-        fields:
-          'fsq_place_id,name,location,latitude,longitude,distance,categories,tel,website',
+        limit: 20,
       },
     });
 
     const centers = response.data?.results || [];
 
     console.log(
-      `Found ${centers.length} hospitals for ${searchQuery}`
+      `Hospitals found for ${searchLocation}: ${centers.length}`
     );
 
-    return res.status(200).json({
-      success: true,
-      count: centers.length,
-      results: centers,
-    });
+    // Return array directly for frontend compatibility
+    return res.status(200).json(centers);
+
   } catch (error) {
-    console.error(
-      'Foursquare Search Error:',
-      error.response?.data || error.message
-    );
+    console.error('Foursquare search failed');
+
+    console.error({
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
 
     return res.status(502).json({
       success: false,
       message: 'Could not find hospitals for the specified location',
-      error:
-        error.response?.data?.message ||
-        error.response?.data?.meta?.errorDetail ||
-        error.message,
+      details: error.response?.data || error.message,
     });
   }
 };

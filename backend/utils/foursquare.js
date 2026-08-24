@@ -2,7 +2,8 @@ const axios = require('axios');
 require('dotenv').config();
 
 const foursquare = axios.create({
-  baseURL: 'https://places-api.foursquare.com/places',
+  baseURL: 'https://places-api.foursquare.com',
+  timeout: 15000,
   headers: {
     Accept: 'application/json',
     Authorization: `Bearer ${process.env.FSQ_API_KEY}`,
