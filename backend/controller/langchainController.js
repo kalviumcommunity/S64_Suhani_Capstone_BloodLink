@@ -33,7 +33,7 @@ class GeminiLLM {
     if (!genAI) {
       throw new Error('Gemini AI not initialized');
     }
-    this.model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    this.model = genAI.getGenerativeModel({ model: "gemini-3.7-flash" });
   }
 
   async call(prompt) {
