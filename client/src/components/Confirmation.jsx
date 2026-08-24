@@ -72,7 +72,7 @@ export default function ConfirmBooking() {
       });
 
       // Create new booking in database
-      const response = await api.post('/api/slot/book', {
+      const response = await api.post('/api/slots/book', {
         userId: currentUserId,
         centerId: bookingDetails.center._id,
         date: bookingDetails.date,
