@@ -53,7 +53,7 @@ export default function BookSlot() {
       
       // If the API endpoint for available slots exists:
       
-      const response = await api.get(`/api/slot/available/${selectedCenter._id}/${selectedDate}`);
+      const response = await api.get(`/api/slots/available/${selectedCenter._id}/${selectedDate}`);
       console.log('Available slots response:', response.data);
       if (response.data && response.data.availableSlots) {
         setAvailableTimeSlots(response.data.availableSlots);
