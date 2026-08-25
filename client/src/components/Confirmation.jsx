@@ -62,27 +62,40 @@ export default function ConfirmBooking() {
         return;
       }
 
-      // Log the data we're about to send for debugging
-      console.log('Sending booking data:', {
-        userId: currentUserId,
-        centerId: bookingDetails.center._id,
-        date: bookingDetails.date,
-        time: bookingDetails.time,
-        userConfirmedEligibility: isEligible
-      });
+     const centerId =
+  bookingDetails.center?._id ||
+  bookingDetails.center?.fsq_place_id ||
+  bookingDetails.center?.id;
 
-      // Create new booking in database
-      const response = await api.post('/api/slots/book', {
-        userId: currentUserId,
-        centerId: bookingDetails.center._id,
-        date: bookingDetails.date,
-        time: bookingDetails.time,
-        userConfirmedEligibility: isEligible
-      }, {
-        headers: {
-          'Authorization': `Bearer ${currentToken}`
-        }
-      });
+if (!centerId) {
+  console.error('Invalid center object:', bookingDetails.center);
+  setError('Invalid donation center. Please select the center again.');
+  return;
+}
+
+console.log('Sending booking data:', {
+  userId: currentUserId,
+  centerId,
+  date: bookingDetails.date,
+  time: bookingDetails.time,
+  userConfirmedEligibility: isEligible
+});
+
+const response = await api.post(
+  '/api/slots/book',
+  {
+    userId: currentUserId,
+    centerId: centerId,
+    date: bookingDetails.date,
+    time: bookingDetails.time,
+    userConfirmedEligibility: isEligible
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${currentToken}`
+    }
+  }
+);
       
       console.log('Booking response:', response.data);
       
