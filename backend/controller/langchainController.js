@@ -1,549 +1,298 @@
 // backend/controller/langchainController.js
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { PromptTemplate } = require('@langchain/core/prompts');
-const { LLMChain } = require('langchain/chains');
-const { StructuredOutputParser } = require('@langchain/core/output_parsers');
-const { z } = require('zod');
-
 const Donor = require('../models/Donor');
 const BloodInventory = require('../models/BloodInventory');
 const DonationRequest = require('../models/DonationRequest');
-
 
 // =====================================================
 // GEMINI INITIALIZATION
 // =====================================================
 
 let genAI;
-let llm;
 
-function initializeGemini() {
-  if (!process.env.GEMINI_API_KEY) {
-    console.error('❌ GEMINI_API_KEY environment variable is not set');
-    return false;
-  }
+if (!process.env.GEMINI_API_KEY) {
+  console.error('❌ GEMINI_API_KEY is not set');
+} else {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  console.log('✅ Gemini initialized');
+}
 
-  try {
-    genAI = new GoogleGenerativeAI(
-      process.env.GEMINI_API_KEY
-    );
+// =====================================================
+// CONFIG
+// =====================================================
 
-    llm = new GeminiLLM();
+// Change these if needed
+const PRIMARY_MODEL = 'gemini-3.7-flash';
 
-    console.log('✅ Gemini initialized successfully');
+// Add fallback models if available for your API key
+const FALLBACK_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash'
+];
 
-    return true;
+const MAX_RETRIES = 4;
+const INITIAL_DELAY = 2000;
 
-  } catch (error) {
-    console.error(
-      '❌ Failed to initialize Gemini:',
-      error.message
-    );
+// =====================================================
+// PREVENT MULTIPLE SIMULTANEOUS REQUESTS
+// =====================================================
 
-    return false;
+let activeGeminiRequests = 0;
+const MAX_CONCURRENT_REQUESTS = 1;
+
+async function waitForGeminiSlot() {
+  while (activeGeminiRequests >= MAX_CONCURRENT_REQUESTS) {
+    console.log('⏳ Waiting for active Gemini request to finish...');
+    await sleep(1000);
   }
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // =====================================================
-// CUSTOM GEMINI LLM
-// Includes Retry + Exponential Backoff + Fallback
+// GEMINI REQUEST WITH RETRIES
 // =====================================================
 
-class GeminiLLM {
-
-  constructor() {
-
-    if (!genAI) {
-      throw new Error(
-        'Gemini AI not initialized'
-      );
-    }
-
-    // Primary + fallback models
-    this.modelNames = [
-      'gemini-3.7-flash',
-      'gemini-2.5-flash'
-    ];
-
-    // Number of retries per model
-    this.maxRetries = 3;
-
-    // Initial retry delay
-    this.baseDelay = 2000;
+async function generateGeminiContent(prompt) {
+  if (!genAI) {
+    throw new Error('Gemini API is not initialized. Check GEMINI_API_KEY.');
   }
 
+  const models = [
+    PRIMARY_MODEL,
+    ...FALLBACK_MODELS
+  ];
 
-  // ---------------------------------------------------
-  // MAIN GEMINI CALL
-  // ---------------------------------------------------
+  await waitForGeminiSlot();
 
-  async call(prompt) {
+  activeGeminiRequests++;
 
-    const promptText =
-      typeof prompt === 'string'
-        ? prompt
-        : JSON.stringify(prompt);
+  try {
+    let lastError;
 
-    let lastError = null;
+    for (const modelName of models) {
 
+      console.log(`\n🤖 Trying Gemini model: ${modelName}`);
 
-    // Try each Gemini model
-    for (const modelName of this.modelNames) {
+      const model = genAI.getGenerativeModel({
+        model: modelName
+      });
 
-      console.log(
-        `🤖 Using Gemini model: ${modelName}`
-      );
-
-      const model =
-        genAI.getGenerativeModel({
-          model: modelName
-        });
-
-
-      // Retry the current model
-      for (
-        let attempt = 0;
-        attempt <= this.maxRetries;
-        attempt++
-      ) {
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
 
         try {
-
           console.log(
-            `🚀 Gemini request | Model: ${modelName} | Attempt: ${attempt + 1}/${this.maxRetries + 1}`
+            `🚀 Gemini request | Model: ${modelName} | Attempt: ${attempt}/${MAX_RETRIES}`
           );
 
+          const result = await model.generateContent(prompt);
 
-          // Call Gemini API
-          const result =
-            await model.generateContent(
-              promptText
-            );
-
-
-          const response =
-            await result.response;
-
-
-          const text =
-            response.text();
-
-
-          if (!text) {
-            throw new Error(
-              'Gemini returned an empty response'
-            );
+          if (!result || !result.response) {
+            throw new Error('No response received from Gemini');
           }
 
+          const text = result.response.text();
+
+          if (!text) {
+            throw new Error('Gemini returned an empty response');
+          }
 
           console.log(
-            `✅ Gemini response successful using ${modelName}`
+            `✅ Gemini response successful | Model: ${modelName}`
           );
 
-
-          return {
-            text
-          };
-
+          return text;
 
         } catch (error) {
 
           lastError = error;
 
+          const status = error.status;
 
           console.error(
-            `❌ Gemini error | Model: ${modelName} | Attempt: ${attempt + 1}`,
+            `❌ Gemini error | Model: ${modelName} | Attempt: ${attempt}`,
             error.message
           );
 
+          // Don't retry invalid API key
+          if (status === 401 || status === 403) {
+            throw error;
+          }
 
-          const status = error.status;
-
-
-          // Retry only temporary errors
-          const retryableStatuses = [
-            429,
-            500,
-            502,
-            503,
-            504
-          ];
-
-
+          // Retry 429 / 500 / 503
           const shouldRetry =
-            retryableStatuses.includes(status);
+            status === 429 ||
+            status === 500 ||
+            status === 502 ||
+            status === 503 ||
+            status === 504;
 
-
-          // Stop retrying if error is permanent
-          if (
-            !shouldRetry ||
-            attempt === this.maxRetries
-          ) {
-
-            console.log(
-              `⚠️ Stopping retries for ${modelName}`
-            );
-
+          if (!shouldRetry) {
             break;
           }
 
+          if (attempt < MAX_RETRIES) {
 
-          // Exponential backoff
-          const delay =
-            this.baseDelay *
-            Math.pow(2, attempt) +
-            Math.floor(Math.random() * 1000);
+            const exponentialDelay =
+              INITIAL_DELAY * Math.pow(2, attempt - 1);
 
+            const randomJitter =
+              Math.floor(Math.random() * 1500);
 
-          console.log(
-            `⏳ Gemini busy. Retrying in ${delay}ms...`
-          );
+            const delay =
+              exponentialDelay + randomJitter;
 
+            console.log(
+              `⏳ Gemini busy. Retrying in ${delay}ms...`
+            );
 
-          await new Promise(resolve =>
-            setTimeout(resolve, delay)
-          );
-
+            await sleep(delay);
+          }
         }
-
       }
 
-
       console.log(
-        `🔄 Switching to fallback model...`
+        `⚠️ Model ${modelName} failed. Trying next model...`
       );
-
     }
 
+    throw lastError || new Error('All Gemini models failed');
 
-    console.error(
-      '❌ All Gemini models failed'
+  } finally {
+    activeGeminiRequests--;
+
+    console.log(
+      `🔓 Gemini request finished. Active requests: ${activeGeminiRequests}`
     );
-
-
-    throw new Error(
-      `All Gemini models failed: ${
-        lastError?.message || 'Unknown error'
-      }`
-    );
-
   }
-
-
-  // ---------------------------------------------------
-  // LANGCHAIN COMPATIBILITY
-  // ---------------------------------------------------
-
-  async invoke(input) {
-    return this.call(input);
-  }
-
-
-  async stream(input) {
-    const response =
-      await this.call(input);
-
-    return [response];
-  }
-
-
-  async pipe(output) {
-    return output;
-  }
-
 }
-
-
-// =====================================================
-// INITIALIZE GEMINI
-// =====================================================
-
-const isInitialized =
-  initializeGemini();
-
 
 // =====================================================
 // 1. SMART DONOR MATCHING
 // =====================================================
 
 exports.smartDonorMatch = async (req, res) => {
-
   try {
-
-    if (!isInitialized) {
-      return res.status(503).json({
-        success: false,
-        error: 'Gemini AI is not initialized'
-      });
-    }
-
-
-    const { requestId } =
-      req.params;
-
+    const { requestId } = req.params;
 
     const request =
-      await DonationRequest.findById(
-        requestId
-      );
-
+      await DonationRequest.findById(requestId);
 
     if (!request) {
-
       return res.status(404).json({
         error: 'Donation request not found'
       });
-
     }
 
-
     const compatibleTypes =
-      getCompatibleBloodTypes(
-        request.bloodType
-      );
-
+      getCompatibleBloodTypes(request.bloodType);
 
     const eligibleDonors =
       await Donor.find({
-
         bloodType: {
           $in: compatibleTypes
         },
-
         eligibleToDonateSince: {
           $lte: new Date()
         }
-
       }).limit(50);
 
-
     if (eligibleDonors.length === 0) {
-
       return res.json({
-
-        message:
-          'No eligible donors found',
-
+        message: 'No eligible donors found',
         recommendations: []
-
       });
-
     }
 
-
-    const donorRecommendationParser =
-      StructuredOutputParser.fromZodSchema(
-
-        z.array(
-
-          z.object({
-
-            donorId:
-              z.string(),
-
-            priorityScore:
-              z.number(),
-
-            reasonForSelection:
-              z.string(),
-
-            contactStrategy:
-              z.string()
-
-          })
-
-        )
-
-      );
-
-
-    const donorMatchPrompt =
-      new PromptTemplate({
-
-        template: `
-You are an AI assistant for a blood donation center.
-
-PATIENT NEED:
-
-Blood type needed: {bloodType}
-
-Units needed: {unitsNeeded}
-
-Urgency level: {urgency}
-
-
-ELIGIBLE DONORS:
-
-{donorDetails}
-
-
-Recommend the top 5 donors.
-
-Prioritize:
-
-1. Exact blood type compatibility
-2. Eligibility
-3. Donation history
-4. Time since last donation
-5. Urgency level
-
-
-{format_instructions}
-`,
-
-        inputVariables: [
-
-          'bloodType',
-
-          'unitsNeeded',
-
-          'urgency',
-
-          'donorDetails'
-
-        ],
-
-        partialVariables: {
-
-          format_instructions:
-            donorRecommendationParser
-              .getFormatInstructions()
-
-        }
-
-      });
-
-
-    const donorDetails =
-      eligibleDonors.map(donor => {
-
-        const donationCount =
-          donor.donationHistory?.length || 0;
-
-
-        const daysSinceLastDonation =
-          donor.lastDonation
-            ? Math.floor(
-                (new Date() -
-                  donor.lastDonation) /
-                (1000 * 60 * 60 * 24)
-              )
-            : null;
-
-
-        return `
-Donor ID: ${donor._id}
-
-Name: ${donor.name}
-
-Blood Type: ${donor.bloodType}
-
-Previous Donations: ${donationCount}
-
-Days Since Last Donation:
-${daysSinceLastDonation || 'Never donated'}
-`;
-
-      }).join('\n');
-
-
-    // Use direct Gemini instead of depending
-    // completely on LLMChain internals
-
-    const prompt =
-      await donorMatchPrompt.format({
-
-        bloodType:
-          request.bloodType,
-
-        unitsNeeded:
-          request.unitsNeeded,
-
-        urgency:
-          request.urgency,
-
-        donorDetails
-
-      });
-
-
-    const response =
-      await llm.call(prompt);
-
-
+    // Create deterministic scores first
     const recommendations =
-      await donorRecommendationParser.parse(
-        response.text
-      );
+      eligibleDonors
+        .map(donor => {
 
+          const donationCount =
+            donor.donationHistory?.length || 0;
 
-    const hydratedRecommendations =
-      await Promise.all(
+          const daysSinceLastDonation =
+            donor.lastDonation
+              ? Math.floor(
+                  (new Date() - donor.lastDonation) /
+                  (1000 * 60 * 60 * 24)
+                )
+              : 999;
 
-        recommendations.map(
-          async rec => {
+          let priorityScore = 0;
 
-            const donor =
-              await Donor.findById(
-                rec.donorId
-              ).select(
-                'name bloodType phone email lastDonation'
-              );
-
-
-            return {
-
-              ...rec,
-
-              donor:
-                donor
-                  ? donor.toObject()
-                  : {
-                      error:
-                        'Donor not found'
-                    }
-
-            };
-
+          // Exact blood type gets priority
+          if (donor.bloodType === request.bloodType) {
+            priorityScore += 50;
+          } else {
+            priorityScore += 30;
           }
+
+          // Donation experience
+          priorityScore +=
+            Math.min(donationCount * 5, 25);
+
+          // More time since last donation
+          priorityScore +=
+            Math.min(
+              Math.floor(daysSinceLastDonation / 10),
+              25
+            );
+
+          return {
+            donor,
+            priorityScore
+          };
+        })
+        .sort(
+          (a, b) =>
+            b.priorityScore - a.priorityScore
         )
+        .slice(0, 5);
 
-      );
-
+    const result =
+      recommendations.map(item => ({
+        donorId: item.donor._id,
+        priorityScore: item.priorityScore,
+        reasonForSelection:
+          `${item.donor.bloodType} compatible donor with ` +
+          `${item.donor.donationHistory?.length || 0} previous donations.`,
+        contactStrategy:
+          request.urgency === 'critical'
+            ? 'Call immediately and follow up with SMS.'
+            : 'Send SMS notification and follow up if needed.',
+        donor: {
+          _id: item.donor._id,
+          name: item.donor.name,
+          bloodType: item.donor.bloodType,
+          phone: item.donor.phone,
+          email: item.donor.email,
+          lastDonation: item.donor.lastDonation
+        }
+      }));
 
     return res.json({
-
-      success: true,
-
-      requestDetails:
-        request,
-
-      recommendations:
-        hydratedRecommendations
-
+      requestDetails: request,
+      recommendations: result
     });
-
 
   } catch (error) {
 
     console.error(
-      '❌ Error in smart donor matching:',
+      'Error in smart donor matching:',
       error
     );
 
-
-    return handleAIError(
-      res,
-      error,
-      'smart donor matching'
-    );
-
+    return res.status(500).json({
+      error:
+        'Server error during smart donor matching'
+    });
   }
-
 };
-
 
 // =====================================================
 // 2. DONATION APPEAL GENERATOR
@@ -554,66 +303,32 @@ async (req, res) => {
 
   try {
 
-    if (!isInitialized) {
-
-      return res.status(503).json({
-
-        success: false,
-
-        error:
-          'Gemini AI is not initialized'
-
-      });
-
-    }
-
-
-    const {
-      donorId,
-      requestId
-    } = req.params;
-
+    const { donorId, requestId } =
+      req.params;
 
     const donor =
-      await Donor.findById(
-        donorId
-      );
-
+      await Donor.findById(donorId);
 
     const request =
-      await DonationRequest.findById(
-        requestId
-      );
-
+      await DonationRequest.findById(requestId);
 
     if (!donor || !request) {
 
       return res.status(404).json({
-
         error:
           !donor
             ? 'Donor not found'
             : 'Donation request not found'
-
       });
-
     }
-
 
     const inventory =
       await BloodInventory.findOne({
-
-        bloodType:
-          request.bloodType
-
+        bloodType: request.bloodType
       });
 
-
     const currentStock =
-      inventory
-        ? inventory.units
-        : 0;
-
+      inventory ? inventory.units : 0;
 
     const criticality =
       getCriticalityLevel(
@@ -621,49 +336,25 @@ async (req, res) => {
         request.unitsNeeded
       );
 
-
     const prompt = `
 Generate a personalized blood donation appeal.
 
 DONOR:
-
 Name: ${donor.name}
-
 Blood Type: ${donor.bloodType}
-
-Previous Donations:
-${donor.donationHistory?.length || 0}
-
-Last Donation:
-${
-  donor.lastDonation
-    ? donor.lastDonation.toDateString()
-    : 'Never'
-}
-
+Previous Donations: ${donor.donationHistory?.length || 0}
 
 REQUEST:
+Blood Type Needed: ${request.bloodType}
+Units Needed: ${request.unitsNeeded}
+Urgency: ${request.urgency}
+Current Stock: ${currentStock}
+Criticality: ${criticality}
 
-Blood Type:
-${request.bloodType}
-
-Units Needed:
-${request.unitsNeeded}
-
-Urgency:
-${request.urgency}
-
-Current Stock:
-${currentStock}
-
-Criticality:
-${criticality}
-
-
-Return exactly:
+Return exactly in this format:
 
 SMS:
-[maximum 160 characters]
+[text]
 
 EMAIL SUBJECT:
 [text]
@@ -672,59 +363,64 @@ EMAIL BODY:
 [text]
 `;
 
+    let generatedText;
 
-    const response =
-      await llm.call(
-        prompt
+    try {
+      generatedText =
+        await generateGeminiContent(prompt);
+
+    } catch (error) {
+
+      console.error(
+        'Gemini failed, using fallback appeal'
       );
 
+      generatedText = `
+SMS:
+Hi ${donor.name}, there is a ${request.urgency} need for ${request.bloodType} compatible blood. Your donation could help save a life.
 
-    const result =
-      parseAppealContent(
-        response.text
-      );
+EMAIL SUBJECT:
+Urgent Blood Donation Request
 
+EMAIL BODY:
+Dear ${donor.name},
+
+There is currently a ${request.urgency} requirement for blood compatible with your ${donor.bloodType} blood type.
+
+The blood bank currently requires ${request.unitsNeeded} units.
+
+If you are eligible and available, please consider donating.
+
+Thank you for helping save lives.
+`;
+    }
+
+    const appeal =
+      parseAppealContent(generatedText);
 
     return res.json({
-
-      success: true,
-
-      donorId:
-        donor._id,
-
-      donorName:
-        donor.name,
-
-      requestId:
-        request._id,
-
-      appeal:
-        result
-
+      donorId: donor._id,
+      donorName: donor.name,
+      requestId: request._id,
+      appeal
     });
-
 
   } catch (error) {
 
     console.error(
-      '❌ Error generating donation appeal:',
+      'Error generating donation appeal:',
       error
     );
 
-
-    return handleAIError(
-      res,
-      error,
-      'appeal generation'
-    );
-
+    return res.status(500).json({
+      error:
+        'Server error during appeal generation'
+    });
   }
-
 };
 
-
 // =====================================================
-// 3. INVENTORY FORECAST
+// 3. EXPLAINABLE INVENTORY FORECAST
 // =====================================================
 
 exports.explainableInventoryForecast =
@@ -732,34 +428,25 @@ async (req, res) => {
 
   try {
 
-    if (!isInitialized) {
-
-      return res.status(503).json({
-
-        success: false,
-
-        error:
-          'Gemini AI is not initialized',
-
-        details:
-          'Check GEMINI_API_KEY'
-
-      });
-
-    }
-
-
     const days =
-      Number(req.query.days) || 30;
+      Math.max(
+        1,
+        Math.min(
+          Number(req.query.days) || 30,
+          365
+        )
+      );
 
+    console.log(
+      `\n📊 Generating ${days}-day inventory forecast...`
+    );
 
-    // -----------------------------------------------
+    // ---------------------------------------------
     // GET INVENTORY
-    // -----------------------------------------------
+    // ---------------------------------------------
 
     let inventoryData =
       await BloodInventory.find();
-
 
     if (
       !inventoryData ||
@@ -770,79 +457,35 @@ async (req, res) => {
         '⚠️ No inventory found. Using mock data.'
       );
 
-
       inventoryData = [
-
-        {
-          bloodType: 'A+',
-          units: 100
-        },
-
-        {
-          bloodType: 'A-',
-          units: 50
-        },
-
-        {
-          bloodType: 'B+',
-          units: 75
-        },
-
-        {
-          bloodType: 'B-',
-          units: 40
-        },
-
-        {
-          bloodType: 'AB+',
-          units: 30
-        },
-
-        {
-          bloodType: 'AB-',
-          units: 20
-        },
-
-        {
-          bloodType: 'O+',
-          units: 120
-        },
-
-        {
-          bloodType: 'O-',
-          units: 60
-        }
-
+        { bloodType: 'A+', units: 100 },
+        { bloodType: 'A-', units: 50 },
+        { bloodType: 'B+', units: 75 },
+        { bloodType: 'B-', units: 40 },
+        { bloodType: 'AB+', units: 30 },
+        { bloodType: 'AB-', units: 20 },
+        { bloodType: 'O+', units: 120 },
+        { bloodType: 'O-', units: 60 }
       ];
-
     }
 
-
-    // -----------------------------------------------
+    // ---------------------------------------------
     // GET REQUEST HISTORY
-    // -----------------------------------------------
+    // ---------------------------------------------
 
     const threeMonthsAgo =
       new Date();
-
 
     threeMonthsAgo.setMonth(
       threeMonthsAgo.getMonth() - 3
     );
 
-
     let requests =
       await DonationRequest.find({
-
         requestDate: {
-
-          $gte:
-            threeMonthsAgo
-
+          $gte: threeMonthsAgo
         }
-
       });
-
 
     if (
       !requests ||
@@ -853,177 +496,150 @@ async (req, res) => {
         '⚠️ No requests found. Using mock data.'
       );
 
-
       requests = [
-
         {
-
           bloodType: 'A+',
-
           unitsNeeded: 20,
-
           urgency: 'high',
-
-          requestDate:
-            new Date()
-
+          requestDate: new Date()
         },
-
         {
-
           bloodType: 'O-',
-
           unitsNeeded: 15,
-
           urgency: 'critical',
-
-          requestDate:
-            new Date()
-
+          requestDate: new Date()
         },
-
         {
-
           bloodType: 'B+',
-
           unitsNeeded: 10,
-
           urgency: 'medium',
-
-          requestDate:
-            new Date()
-
+          requestDate: new Date()
         },
-
         {
-
           bloodType: 'AB+',
-
           unitsNeeded: 5,
-
           urgency: 'low',
-
-          requestDate:
-            new Date()
-
+          requestDate: new Date()
         }
-
       ];
-
     }
 
-
-    // -----------------------------------------------
+    // ---------------------------------------------
     // CALCULATE USAGE
-    // -----------------------------------------------
+    // ---------------------------------------------
 
     const bloodTypeUsage =
-      calculateDailyUsage(
-        requests
-      );
+      calculateDailyUsage(requests);
 
-
-    // -----------------------------------------------
+    // ---------------------------------------------
     // QUANTITATIVE FORECAST
-    // -----------------------------------------------
+    // ---------------------------------------------
 
     const quantitativePrediction =
       predictNeeds(
-
         inventoryData,
-
         bloodTypeUsage,
-
         days
-
       );
 
-
-    // -----------------------------------------------
-    // FORMAT DATA
-    // -----------------------------------------------
+    // ---------------------------------------------
+    // PREPARE GEMINI DATA
+    // ---------------------------------------------
 
     const currentInventoryText =
-      inventoryData.map(item =>
-        `${item.bloodType}: ${item.units} units`
-      ).join('\n');
-
-
-    const historicalDataText =
       Object.entries(
-        bloodTypeUsage
-      ).map(
+        quantitativePrediction.currentInventory
+      )
+        .map(
+          ([bloodType, units]) =>
+            `${bloodType}: ${units} units`
+        )
+        .join('\n');
 
-        ([bloodType, usage]) =>
+    const usageText =
+      Object.entries(
+        quantitativePrediction.predictedUsage
+      )
+        .map(
+          ([bloodType, units]) =>
+            `${bloodType}: predicted usage ${units} units`
+        )
+        .join('\n');
 
-          `${bloodType}: ${usage.toFixed(2)} units/day`
-
-      ).join('\n');
-
-
-    // -----------------------------------------------
-    // GEMINI PROMPT
-    // -----------------------------------------------
+    const shortageText =
+      Object.entries(
+        quantitativePrediction.predictedShortage
+      )
+        .filter(
+          ([, shortage]) =>
+            shortage > 0
+        )
+        .map(
+          ([bloodType, shortage]) =>
+            `${bloodType}: shortage of ${shortage} units`
+        )
+        .join('\n') ||
+      'No shortages predicted';
 
     const prompt = `
 You are an AI assistant for a blood bank.
 
-Analyze the following blood inventory data.
-
-FORECAST PERIOD:
-${days} days
-
+Analyze this ${days}-day blood inventory forecast.
 
 CURRENT INVENTORY:
-
 ${currentInventoryText}
 
+PREDICTED USAGE:
+${usageText}
 
-AVERAGE DAILY USAGE:
-
-${historicalDataText}
-
-
-QUANTITATIVE FORECAST:
-
-${JSON.stringify(
-  quantitativePrediction,
-  null,
-  2
-)}
-
+PREDICTED SHORTAGES:
+${shortageText}
 
 Provide:
 
-1. A clear summary
-2. Blood types at risk of shortage
-3. Reasons for the prediction
-4. Recommended donation priorities
-5. Specific actionable recommendations
+1. Executive summary
+2. Blood types at risk
+3. Explanation of expected usage
+4. Recommended actions
+5. Donation priorities
 
-Keep the response concise and easy for
-blood bank staff to understand.
+Keep the response concise and useful for blood bank staff.
 `;
 
-
-    // -----------------------------------------------
+    // ---------------------------------------------
     // CALL GEMINI
-    // -----------------------------------------------
+    // ---------------------------------------------
 
-    console.log(
-      '🤖 Generating explainable forecast...'
-    );
+    let explainableForecast;
+    let aiAvailable = true;
 
+    try {
 
-    const response =
-      await llm.call(
-        prompt
+      console.log(
+        '🤖 Generating explainable forecast...'
       );
 
+      explainableForecast =
+        await generateGeminiContent(prompt);
 
-    // -----------------------------------------------
-    // SUCCESS
-    // -----------------------------------------------
+    } catch (error) {
+
+      console.error(
+        '⚠️ Gemini unavailable. Using local forecast explanation.'
+      );
+
+      aiAvailable = false;
+
+      explainableForecast =
+        generateLocalForecastExplanation(
+          quantitativePrediction,
+          days
+        );
+    }
+
+    // ---------------------------------------------
+    // RETURN RESPONSE
+    // ---------------------------------------------
 
     return res.json({
 
@@ -1032,36 +648,37 @@ blood bank staff to understand.
       quantitativeForecast:
         quantitativePrediction,
 
-      explainableForecast:
-        response.text,
+      explainableForecast,
 
-      daysForecasted:
-        days,
+      aiAvailable,
+
+      daysForecasted: days,
 
       analysisDate:
         new Date()
 
     });
 
-
   } catch (error) {
 
     console.error(
-      '❌ Error generating explainable forecast:',
+      'Error generating explainable forecast:',
       error
     );
 
+    return res.status(500).json({
 
-    return handleAIError(
-      res,
-      error,
-      'forecast generation'
-    );
+      success: false,
 
+      error:
+        'Server error during forecast generation',
+
+      details:
+        error.message
+
+    });
   }
-
 };
-
 
 // =====================================================
 // 4. DONOR ENGAGEMENT STRATEGY
@@ -1072,214 +689,193 @@ async (req, res) => {
 
   try {
 
-    if (!isInitialized) {
-
-      return res.status(503).json({
-
-        success: false,
-
-        error:
-          'Gemini AI is not initialized'
-
-      });
-
-    }
-
-
     const { donorId } =
       req.params;
 
-
     const donor =
-      await Donor.findById(
-        donorId
-      );
-
+      await Donor.findById(donorId);
 
     if (!donor) {
 
       return res.status(404).json({
-
         error:
           'Donor not found'
-
       });
-
     }
-
 
     const donationCount =
       donor.donationHistory?.length || 0;
 
-
     const daysSinceLastDonation =
       donor.lastDonation
-
         ? Math.floor(
-            (
-              new Date() -
-              donor.lastDonation
-            ) /
+            (new Date() -
+              new Date(donor.lastDonation)) /
             (1000 * 60 * 60 * 24)
           )
-
         : 'Never donated';
 
-
     const prompt = `
-You are an AI consultant for a blood donation center.
-
-Create a personalized donor engagement strategy.
+Create a donor engagement strategy.
 
 DONOR:
-
-Name:
-${donor.name}
-
-Blood Type:
-${donor.bloodType}
-
-Total Donations:
-${donationCount}
-
-Days Since Last Donation:
-${daysSinceLastDonation}
-
-Medical Conditions:
-${donor.medicalConditions?.join(', ') || 'None'}
-
+Name: ${donor.name}
+Blood Type: ${donor.bloodType}
+Previous Donations: ${donationCount}
+Days Since Last Donation: ${daysSinceLastDonation}
 
 Provide:
 
-1. Donor Profile Analysis
-2. Recommended Approach
-3. Best Communication Channels
-4. Recommended Timing
-5. Key Messages
-6. Potential Barriers
-7. Long-Term Engagement Strategy
-
-Format clearly using headings and bullet points.
+1. Donor profile
+2. Recommended approach
+3. Best communication channel
+4. Suggested timing
+5. Key messages
+6. Potential barriers
+7. Long-term engagement strategy
 `;
 
+    let strategy;
 
-    const response =
-      await llm.call(
-        prompt
-      );
+    try {
 
+      strategy =
+        await generateGeminiContent(prompt);
+
+    } catch (error) {
+
+      strategy = {
+        donorProfile:
+          `${donor.name} has ${donationCount} previous donations.`,
+        recommendedApproach:
+          'Use personalized and appreciative communication.',
+        communicationChannels: [
+          {
+            channel: 'SMS',
+            rationale:
+              'Quick and direct communication.',
+            timing:
+              'During normal daytime hours.'
+          }
+        ],
+        keyMessages: [
+          'Your donation can save lives.',
+          'Your blood type is valuable.'
+        ],
+        potentialBarriers: [
+          'Availability',
+          'Donation eligibility'
+        ],
+        longTermEngagement:
+          'Send periodic reminders and thank-you messages.'
+      };
+    }
 
     return res.json({
 
-      success: true,
+      donorId: donor._id,
 
-      donorId:
-        donor._id,
+      donorName: donor.name,
 
-      donorName:
-        donor.name,
-
-      bloodType:
-        donor.bloodType,
+      bloodType: donor.bloodType,
 
       engagementStrategy:
-        response.text
+        strategy
 
     });
-
 
   } catch (error) {
 
     console.error(
-      '❌ Error generating engagement strategy:',
+      'Error generating engagement strategy:',
       error
     );
 
-
-    return handleAIError(
-      res,
-      error,
-      'engagement strategy generation'
-    );
-
+    return res.status(500).json({
+      error:
+        'Server error during strategy generation'
+    });
   }
-
 };
 
-
 // =====================================================
-// AI ERROR HANDLER
+// LOCAL FORECAST FALLBACK
 // =====================================================
 
-function handleAIError(
-  res,
-  error,
-  operation
+function generateLocalForecastExplanation(
+  forecast,
+  days
 ) {
 
-  const message =
-    error.message || '';
+  const shortages =
+    Object.entries(
+      forecast.predictedShortage
+    )
+      .filter(
+        ([, shortage]) =>
+          shortage > 0
+      );
 
-  const isServiceUnavailable =
-    message.includes('503') ||
-    message.includes('Service Unavailable');
+  let explanation =
+    `EXECUTIVE SUMMARY\n\n`;
 
-  const isRateLimited =
-    message.includes('429') ||
-    message.includes('Too Many Requests');
+  explanation +=
+    `This forecast analyzes expected blood inventory needs over the next ${days} days.\n\n`;
 
+  if (shortages.length === 0) {
 
-  if (isServiceUnavailable) {
+    explanation +=
+      `No blood shortages are currently predicted based on the available inventory and historical demand.\n\n`;
 
-    return res.status(503).json({
+  } else {
 
-      success: false,
+    explanation +=
+      `The following blood types may experience shortages:\n\n`;
 
-      error:
-        'AI service is temporarily busy. Please try again in a moment.',
+    shortages.forEach(
+      ([bloodType, shortage]) => {
 
-      details:
-        message
-
-    });
-
+        explanation +=
+          `• ${bloodType}: approximately ${shortage} units short\n`;
+      }
+    );
   }
 
+  explanation +=
+    `\nRECOMMENDED ACTIONS\n\n`;
 
-  if (isRateLimited) {
+  Object.entries(
+    forecast.recommendedDonations
+  )
+    .filter(
+      ([, units]) =>
+        units > 0
+    )
+    .forEach(
+      ([bloodType, units]) => {
 
-    return res.status(429).json({
+        explanation +=
+          `• Prioritize donor outreach for ${bloodType}. Target at least ${units} additional units.\n`;
+      }
+    );
 
-      success: false,
+  if (shortages.length === 0) {
 
-      error:
-        'AI request limit reached. Please try again later.',
+    explanation +=
+      `• Continue regular donor engagement.\n`;
 
-      details:
-        message
+    explanation +=
+      `• Monitor inventory levels daily.\n`;
 
-    });
-
+    explanation +=
+      `• Maintain a safety buffer for rare blood types.\n`;
   }
 
-
-  return res.status(500).json({
-
-    success: false,
-
-    error:
-      `Server error during ${operation}`,
-
-    details:
-      message
-
-  });
-
+  return explanation;
 }
 
-
 // =====================================================
-// BLOOD TYPE COMPATIBILITY
+// HELPER FUNCTIONS
 // =====================================================
 
 function getCompatibleBloodTypes(
@@ -1330,21 +926,15 @@ function getCompatibleBloodTypes(
       [
         'O-'
       ]
-
   };
 
-
-  return (
-    bloodCompatibility[
-      receiverBloodType
-    ] || []
-  );
-
+  return bloodCompatibility[
+    receiverBloodType
+  ] || [];
 }
 
-
 // =====================================================
-// CRITICALITY LEVEL
+// CRITICALITY
 // =====================================================
 
 function getCriticalityLevel(
@@ -1353,37 +943,29 @@ function getCriticalityLevel(
 ) {
 
   if (!unitsNeeded || unitsNeeded <= 0) {
-    return 'Sufficient';
+    return 'Unknown';
   }
 
-
   const ratio =
-    currentStock /
-    unitsNeeded;
-
+    currentStock / unitsNeeded;
 
   if (ratio < 0.5) {
     return 'Critical';
   }
 
-
   if (ratio < 1) {
     return 'High';
   }
-
 
   if (ratio < 2) {
     return 'Moderate';
   }
 
-
   return 'Sufficient';
-
 }
 
-
 // =====================================================
-// PARSE APPEAL CONTENT
+// PARSE APPEAL
 // =====================================================
 
 function parseAppealContent(
@@ -1395,18 +977,15 @@ function parseAppealContent(
       /SMS:(.*?)(?=EMAIL SUBJECT:|$)/s
     );
 
-
   const subjectMatch =
     responseText.match(
       /EMAIL SUBJECT:(.*?)(?=EMAIL BODY:|$)/s
     );
 
-
   const bodyMatch =
     responseText.match(
       /EMAIL BODY:(.*?)$/s
     );
-
 
   return {
 
@@ -1426,16 +1005,12 @@ function parseAppealContent(
         bodyMatch
           ? bodyMatch[1].trim()
           : ''
-
     }
-
   };
-
 }
 
-
 // =====================================================
-// CALCULATE DAILY BLOOD USAGE
+// DAILY USAGE CALCULATION
 // =====================================================
 
 function calculateDailyUsage(
@@ -1443,7 +1018,6 @@ function calculateDailyUsage(
 ) {
 
   const bloodTypes = [
-
     'A+',
     'A-',
     'B+',
@@ -1452,12 +1026,9 @@ function calculateDailyUsage(
     'AB-',
     'O+',
     'O-'
-
   ];
 
-
   const usage = {};
-
 
   bloodTypes.forEach(type => {
 
@@ -1467,37 +1038,23 @@ function calculateDailyUsage(
           req.bloodType === type
       );
 
-
     const totalUnits =
       typeRequests.reduce(
-
         (sum, req) =>
-
           sum +
-          (
-            Number(
-              req.unitsNeeded
-            ) || 0
-          ),
-
+          (Number(req.unitsNeeded) || 0),
         0
-
       );
-
 
     usage[type] =
       totalUnits / 90;
-
   });
 
-
   return usage;
-
 }
 
-
 // =====================================================
-// PREDICT BLOOD NEEDS
+// PREDICTION
 // =====================================================
 
 function predictNeeds(
@@ -1506,146 +1063,94 @@ function predictNeeds(
   days
 ) {
 
-  try {
+  const prediction = {
 
-    const prediction = {
+    currentInventory: {},
 
-      currentInventory: {},
+    predictedUsage: {},
 
-      predictedUsage: {},
+    predictedShortage: {},
 
-      predictedShortage: {},
+    recommendedDonations: {}
+  };
 
-      recommendedDonations: {}
+  const bloodTypes = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-'
+  ];
 
-    };
+  bloodTypes.forEach(type => {
 
+    prediction.currentInventory[type] = 0;
 
-    const inventoryArray =
-      Array.isArray(inventory)
-        ? inventory
-        : [inventory];
+    prediction.predictedUsage[type] =
+      Math.ceil(
+        (dailyUsage[type] || 0) *
+        days
+      );
 
+    prediction.predictedShortage[type] = 0;
 
-    const bloodTypes = [
+    prediction.recommendedDonations[type] = 0;
+  });
 
-      'A+',
-      'A-',
-      'B+',
-      'B-',
-      'AB+',
-      'AB-',
-      'O+',
-      'O-'
+  const inventoryArray =
+    Array.isArray(inventory)
+      ? inventory
+      : [inventory];
 
-    ];
+  inventoryArray.forEach(item => {
 
+    if (
+      !item ||
+      !item.bloodType
+    ) {
+      return;
+    }
 
-    // Initialize all types
+    const bloodType =
+      item.bloodType;
 
-    bloodTypes.forEach(type => {
+    const units =
+      Number(item.units) || 0;
 
-      prediction.currentInventory[type] = 0;
+    prediction.currentInventory[
+      bloodType
+    ] = units;
 
-      prediction.predictedUsage[type] = 0;
-
-      prediction.predictedShortage[type] = 0;
-
-      prediction.recommendedDonations[type] = 0;
-
-    });
-
-
-    // Process inventory
-
-    inventoryArray.forEach(item => {
-
-      if (
-        !item ||
-        !item.bloodType
-      ) {
-
-        console.warn(
-          'Invalid inventory item:',
-          item
-        );
-
-        return;
-
-      }
-
-
-      const bloodType =
-        item.bloodType;
-
-
-      const units =
-        Number(item.units) || 0;
-
-
-      const predictedUsage =
-        Math.ceil(
-          (dailyUsage[bloodType] || 0) *
-          days
-        );
-
-
-      prediction.currentInventory[
-        bloodType
-      ] = units;
-
-
+    const projectedRemaining =
+      units -
       prediction.predictedUsage[
         bloodType
-      ] = predictedUsage;
+      ];
 
+    if (
+      projectedRemaining < 0
+    ) {
 
-      const projectedRemaining =
-        units -
-        predictedUsage;
-
-
-      if (
-        projectedRemaining < 0
-      ) {
-
-        const shortage =
-          Math.abs(
-            projectedRemaining
-          );
-
-
-        prediction.predictedShortage[
-          bloodType
-        ] = shortage;
-
-
-        prediction.recommendedDonations[
-          bloodType
-        ] = Math.ceil(
-          shortage * 1.2
+      prediction.predictedShortage[
+        bloodType
+      ] =
+        Math.abs(
+          projectedRemaining
         );
 
-      }
+      prediction.recommendedDonations[
+        bloodType
+      ] =
+        Math.ceil(
+          Math.abs(
+            projectedRemaining
+          ) * 1.2
+        );
+    }
+  });
 
-    });
-
-
-    return prediction;
-
-
-  } catch (error) {
-
-    console.error(
-      'Error in predictNeeds:',
-      error
-    );
-
-
-    throw new Error(
-      'Failed to generate quantitative predictions'
-    );
-
-  }
-
+  return prediction;
 }
