@@ -24,6 +24,9 @@ import ContactUs from './Pages/ContactUs';
 import Donation from './components/Donation';
 import InventoryForecast from './components/InventoryForecast';
 import SmartDonorMatching from './components/SmartDonorMatching';
+const API_URL =
+  import.meta.env.VITE_REACT_APP_API_URL ||
+  'https://s64-suhani-capstone-bloodlink-14.onrender.com';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ function App() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch('http://localhost:5000/api/users/profile', {
+          const response = await fetch(`${API_URL}/api/users/profile`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -80,7 +83,7 @@ function App() {
   const handleDeleteAccount = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/users/delete', {
+      const response = await fetch(`${API_URL}/api/users/delete`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
