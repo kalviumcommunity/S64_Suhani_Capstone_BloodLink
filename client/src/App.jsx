@@ -15,7 +15,7 @@ import Slot from './components/slot';
 // import Slot from '../../backend/models/Slot';
 import Confirmation from './components/Confirmation';
 import Landingpage from './Pages/Landingpage';
-// import BookingSuccess from './components/BookingSuccess';
+import BookingSuccess from './components/BookingSuccess';
 import NotificationSystem from './components/NotificationSystem';
 // import NotificationToast from './components/NotificationToast';
 import DonorSuggestions from './Pages/DonorSuggestions';
@@ -136,7 +136,7 @@ function App() {
         <Route path="/Donation" element={<Donation/>} />
         <Route path="/inventory-forecast" element={<InventoryForecast />} />
         <Route path="/donor-matching/:requestId" element={<SmartDonorMatching />} />
-        {/* <Route path="/booking-success" element={<BookingSuccess />} /> */}
+       <Route path="/booking-success" element={<BookingSuccess />} /> 
         <Route path="/login" element={
           authenticated ? <Navigate to="/profile" /> : <Login onLogin={handleLogin} />
         } />
